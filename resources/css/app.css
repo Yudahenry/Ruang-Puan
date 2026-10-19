@@ -1,0 +1,85 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views';
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-berry-900: #4A1E30;
+    --color-berry-700: #6D2E46;
+    --color-berry-500: #8A4061;
+    --color-berry-300: #C98FA8;
+    --color-berry-100: #F1DCE4;
+
+    --color-rose-600: #B5567A;
+    --color-rose-400: #D98CAA;
+    --color-rose-200: #F3D4E0;
+
+    --color-lavender-600: #7A5C9E;
+    --color-lavender-400: #A98FC4;
+    --color-lavender-200: #E6DCF2;
+
+    --color-cream-50:  #FBF6F0;
+    --color-cream-100: #F7EFE6;
+    --color-cream-200: #ECE2D0;
+    --color-ink-900:   #2E2029;
+    --color-ink-600:   #6B5C62;
+    --color-white:     #FFFFFF;
+
+    --color-success-600: #2E7D5B;
+    --color-success-100: #DCEFE4;
+    --color-warning-600: #B9862A;
+    --color-warning-100: #F6EBD4;
+    --color-danger-600:  #B3261E;
+    --color-danger-100:  #F6DEDC;
+    --color-info-600:    #2D6CB5;
+    --color-info-100:    #DCE7F5;
+
+    --color-role-pengguna: #2D6CB5;
+    --color-role-konselor: #7A5C9E;
+    --color-role-admin:    #B5567A;
+}
+
+:root {
+    --color-berry-900: #4A1E30;
+    --color-berry-700: #6D2E46;
+    --color-berry-500: #8A4061;
+    --color-berry-300: #C98FA8;
+    --color-berry-100: #F1DCE4;
+
+    --color-rose-600: #B5567A;
+    --color-rose-400: #D98CAA;
+    --color-rose-200: #F3D4E0;
+
+    --color-lavender-600: #7A5C9E;
+    --color-lavender-400: #A98FC4;
+    --color-lavender-200: #E6DCF2;
+
+    --color-cream-50:  #FBF6F0;
+    --color-cream-100: #F7EFE6;
+    --color-cream-200: #ECE2D0;
+    --color-ink-900:   #2E2029;
+    --color-ink-600:   #6B5C62;
+    --color-white:     #FFFFFF;
+
+    --color-success-600: #2E7D5B;
+    --color-success-100: #DCEFE4;
+    --color-warning-600: #B9862A;
+    --color-warning-100: #F6EBD4;
+    --color-danger-600:  #B3261E;
+    --color-danger-100:  #F6DEDC;
+    --color-info-600:    #2D6CB5;
+    --color-info-100:    #DCE7F5;
+
+    --color-role-pengguna: #2D6CB5;
+    --color-role-konselor: #7A5C9E;
+    --color-role-admin:    #B5567A;
+}
+
+body {
+    background-color: var(--color-cream-50);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+}
