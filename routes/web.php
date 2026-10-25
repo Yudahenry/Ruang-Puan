@@ -96,3 +96,11 @@ Route::middleware(['auth'])->get('/dashboard', function () {
     if ($user->role === 'konselor') return redirect()->route('konselor.dashboard');
     return view('pengguna.dashboard');
 })->name('dashboard');
+
+//VerifikasiKonselorController::class
+use App\Http\Controllers\Admin\VerifikasiKonselorController;
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/verifikasi-konselor', [VerifikasiKonselorController::class, 'index'])->name('konselor.index');
+    Route::patch('/verifikasi-konselor/{id}', [VerifikasiKonselorController::class, 'update'])->name('konselor.update');
+});
