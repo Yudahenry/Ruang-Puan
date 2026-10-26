@@ -39,7 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::get('profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');
 
-<<<<<<< HEAD
+
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 
@@ -50,8 +50,6 @@ Route::middleware('auth')->group(function () {
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
-=======
-
 });
 
 // ==========================================
@@ -129,18 +127,28 @@ Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
     $user = auth()->user();
     if ($user->role === 'admin') return redirect()->route('admin.dashboard');
     if ($user->role === 'konselor') return redirect()->route('konselor.dashboard');
-<<<<<<< HEAD
+
     return redirect()->route('pengguna.dashboard');
 })->name('dashboard');
 
 //VerifikasiKonselorController::class
-use App\Http\Controllers\Admin\VerifikasiKonselorController;
 
+// 1. Group Rute Admin (Verifikasi Konselor)
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/verifikasi-konselor', [VerifikasiKonselorController::class, 'index'])->name('konselor.index');
     Route::patch('/verifikasi-konselor/{id}', [VerifikasiKonselorController::class, 'update'])->name('konselor.update');
 });
-=======
-    return view('pengguna.dashboard');
+
+// 2. Rute Dashboard Utama (Otomatis arahkan berdasarkan Role)
+Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
+    $user = auth()->user();
+
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    if ($user->role === 'konselor') {
+        return redirect()->route('konselor.dashboard');
+    }
+
+    return redirect()->route('pengguna.dashboard');
 })->name('dashboard');
->>>>>>> f218480921101b371c3ab5c011a8c71094d954e8
