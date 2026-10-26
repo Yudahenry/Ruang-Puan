@@ -2,16 +2,17 @@
 
 @section('content')
 <div class="max-w-md mx-auto bg-white rounded-xl shadow-sm border border-cream-200 p-6 sm:p-8 my-10 transition-shadow duration-200 hover:shadow-md" 
-     x-data="{ 
-         email: '{{ old('email') }}', 
-         password: '', 
-         loading: false,
-         emailError() {
-             if (!this.email) return '';
-             if (!this.email.includes('@') || !this.email.includes('.')) return 'Format email belum valid.';
-             return '';
-         }
-     }">
+    x-data="{ 
+        email: '{{ old('email') }}', 
+        password: '', 
+        role: '{{ old('role', 'pengguna') }}',
+        loading: false,
+        emailError() {
+            if (!this.email) return '';
+            if (!this.email.includes('@') || !this.email.includes('.')) return 'Format email belum valid.';
+            return '';
+        }
+    }">
     <div class="text-center mb-6">
         <h1 class="text-2xl font-bold text-berry-900 tracking-tight">Masuk ke Ruang Puan</h1>
         <p class="text-sm text-ink-600 mt-1">Silakan masuk menggunakan akun terdaftar Anda.</p>
@@ -41,6 +42,17 @@
             <label for="password" class="block text-sm font-semibold text-ink-900 mb-1">Kata Sandi</label>
             <input id="password" type="password" name="password" x-model="password" required autocomplete="current-password"
                 class="w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2.5 text-ink-900 border text-sm transition">
+        </div>
+
+        <!-- Tambahan Pilihan Peran / Role Masuk Sebagai -->
+        <div>
+            <label for="role" class="block text-sm font-semibold text-ink-900 mb-1">Masuk Sebagai</label>
+            <select id="role" name="role" x-model="role"
+                class="w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2.5 text-ink-900 border text-sm transition">
+                <option value="pengguna">Pengguna / Pelapor</option>
+                <option value="konselor">Konselor / Psikolog</option>
+                <option value="admin">Administrator</option>
+            </select>
         </div>
 
         <div class="flex items-center justify-between text-sm pt-1">

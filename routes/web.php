@@ -11,10 +11,29 @@ use App\Http\Controllers\Admin\AdminEdukasiController;
 use App\Http\Controllers\Admin\AdminDirektoriController;
 use App\Http\Controllers\Admin\AdminKonselorController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\AuthController as AdminAuthController; // <-- Tambahan untuk Admin Auth
+use App\Http\Controllers\Admin\VerifikasiKonselorController;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+// ==========================================
+// KODE BARU: AUTHENTICATION KHUSUS ADMIN
+// ==========================================
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Guest Admin (Belum Login)
+    Route::middleware('guest:admin')->group(function () {
+        Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
+    });
+
+    // Protected Admin (Sudah Login via Guard Admin)
+    Route::middleware('auth:admin')->group(function () {
+        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+    });
+});
+// ==========================================
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
@@ -97,9 +116,7 @@ Route::middleware(['auth'])->get('/dashboard', function () {
     return view('pengguna.dashboard');
 })->name('dashboard');
 
-//VerifikasiKonselorController::class
-use App\Http\Controllers\Admin\VerifikasiKonselorController;
-
+// Verifikasi Konselor Controller Routes
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/verifikasi-konselor', [VerifikasiKonselorController::class, 'index'])->name('konselor.index');
     Route::patch('/verifikasi-konselor/{id}', [VerifikasiKonselorController::class, 'update'])->name('konselor.update');

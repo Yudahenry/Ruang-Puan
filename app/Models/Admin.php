@@ -2,13 +2,33 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Admin extends Model
+class Admin extends Authenticatable
 {
+    use Notifiable;
+
+    protected $table = 'admins';
+
     protected $fillable = [
         'user_id',
+        'email',
+        'password',
     ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Menegaskan bahwa kolom identifikasi untuk login adalah 'email'.
+     */
+    public function getAuthIdentifierName()
+    {
+        return 'email';
+    }
 
     public function user()
     {
