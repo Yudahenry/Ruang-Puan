@@ -36,7 +36,6 @@ class RegisteredUserController extends Controller
             'alias' => $request->alias,
             'role' => $request->role,
             'status' => 'aktif',
-            'email_verified_at' => now(),
         ]);
 
         if ($request->role === 'konselor') {
@@ -46,14 +45,11 @@ class RegisteredUserController extends Controller
             ]);
         }
 
+        // Kirim email verifikasi (FR-01: akun aktif setelah email diverifikasi)
+        event(new Registered($user));
+
         Auth::login($user);
 
-        if ($user->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        } elseif ($user->role === 'konselor') {
-            return redirect()->route('konselor.dashboard');
-        }
-
-        return redirect()->route('dashboard');
+        return redirect()->route('verification.notice');
     }
 }

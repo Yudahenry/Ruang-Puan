@@ -71,26 +71,26 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // Role-based protected dashboards
-Route::middleware(['auth', 'role:pengguna'])->prefix('pengguna')->name('pengguna.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:pengguna'])->prefix('pengguna')->name('pengguna.')->group(function () {
     Route::get('/dashboard', function () {
         return view('pengguna.dashboard');
     })->name('dashboard');
 });
 
-Route::middleware(['auth', 'role:konselor'])->prefix('konselor')->name('konselor.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->name('konselor.')->group(function () {
     Route::get('/dashboard', function () {
         return view('konselor.dashboard');
     })->name('dashboard');
 });
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
 });
 
 // General dashboard fallback for authenticated users
-Route::middleware(['auth'])->get('/dashboard', function () {
+Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
     $user = auth()->user();
     if ($user->role === 'admin') return redirect()->route('admin.dashboard');
     if ($user->role === 'konselor') return redirect()->route('konselor.dashboard');
