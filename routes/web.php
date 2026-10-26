@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
+
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Pengguna\LaporanController;
@@ -10,12 +13,16 @@ use App\Http\Controllers\DirektoriController;
 use App\Http\Controllers\Admin\AdminEdukasiController;
 use App\Http\Controllers\Admin\AdminDirektoriController;
 use App\Http\Controllers\Admin\AdminKonselorController;
+use App\Http\Controllers\Admin\VerifikasiKonselorController;
 use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
+// ==========================================
+// AUTHENTICATION & EMAIL VERIFICATION ROUTES
+// ==========================================
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
@@ -28,32 +35,53 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Email Verification Routes (Mengatasi error verification.notice)
+    Route::get('/email/verify', function () {
+        return view('auth.verify-email');
+    })->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+        return redirect('/dashboard');
+    })->middleware(['signed'])->name('verification.verify');
+
+    Route::post('/email/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+        return back()->with('message', 'Link verifikasi telah dikirim ulang!');
+    })->middleware(['throttle:6,1'])->name('verification.send');
 });
 
-// Public / Guest accessible Edukasi & Direktori
+// ==========================================
+// PUBLIC ROUTES
+// ==========================================
 Route::get('/edukasi', [EdukasiController::class, 'index'])->name('edukasi.index');
 Route::get('/edukasi/{id}', [EdukasiController::class, 'show'])->name('edukasi.show');
 Route::get('/direktori', [DirektoriController::class, 'index'])->name('direktori.index');
 
-// Pelaporan Routes (Pengguna)
+// ==========================================
+// PENGGUNA ROUTES
+// ==========================================
 Route::middleware(['auth', 'role:pengguna'])->prefix('pelaporan')->name('pelaporan.')->group(function () {
     Route::get('/buat', [LaporanController::class, 'create'])->name('buat');
     Route::post('/', [LaporanController::class, 'store'])->name('store');
     Route::get('/riwayat', [LaporanController::class, 'index'])->name('riwayat');
 });
 
-// Lacak Laporan Route (Accessible by Owner or Admin)
 Route::middleware(['auth'])->get('/pelaporan/lacak/{kode}', [LaporanController::class, 'lacak'])->name('pelaporan.lacak');
 
-// Admin Laporan Routes
-Route::middleware(['auth', 'role:admin'])->prefix('admin/laporan')->name('admin.laporan.')->group(function () {
-    Route::get('/', [AdminLaporanController::class, 'index'])->name('index');
-    Route::get('/{id}', [AdminLaporanController::class, 'show'])->name('show');
-    Route::patch('/{id}', [AdminLaporanController::class, 'updateStatus'])->name('update');
-});
-
-// Admin Edukasi & Direktori Routes
+// ==========================================
+// ADMIN ROUTES
+// ==========================================
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Admin Laporan
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('/', [AdminLaporanController::class, 'index'])->name('index');
+        Route::get('/{id}', [AdminLaporanController::class, 'show'])->name('show');
+        Route::patch('/{id}', [AdminLaporanController::class, 'updateStatus'])->name('update');
+    });
+
+    // Admin Edukasi & Direktori
     Route::get('/edukasi', [AdminEdukasiController::class, 'index'])->name('edukasi.index');
     Route::get('/edukasi/create', [AdminEdukasiController::class, 'createMateri'])->name('edukasi.create');
     Route::post('/edukasi', [AdminEdukasiController::class, 'storeMateri'])->name('edukasi.store');
@@ -65,12 +93,19 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/direktori', [AdminDirektoriController::class, 'store'])->name('direktori.store');
     Route::delete('/direktori/{id}', [AdminDirektoriController::class, 'destroy'])->name('direktori.destroy');
 
+    // Admin Konselor & Verifikasi Konselor (Digabung & Dirapikan)
     Route::get('/konselor', [AdminKonselorController::class, 'index'])->name('konselor.index');
     Route::post('/konselor/{id}/verifikasi', [AdminKonselorController::class, 'verifikasi'])->name('konselor.verifikasi');
     Route::post('/konselor/{id}/tolak', [AdminKonselorController::class, 'tolak'])->name('konselor.tolak');
+
+    // Verifikasi Konselor Controller (Halaman yang baru kamu buat)
+    Route::get('/verifikasi-konselor', [VerifikasiKonselorController::class, 'index'])->name('verifikasi.index');
+    Route::patch('/verifikasi-konselor/{id}', [VerifikasiKonselorController::class, 'update'])->name('konselor.update');
 });
 
-// Role-based protected dashboards
+// ==========================================
+// ROLE-BASED DASHBOARDS (Verified)
+// ==========================================
 Route::middleware(['auth', 'verified', 'role:pengguna'])->prefix('pengguna')->name('pengguna.')->group(function () {
     Route::get('/dashboard', function () {
         return view('pengguna.dashboard');
@@ -96,11 +131,3 @@ Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
     if ($user->role === 'konselor') return redirect()->route('konselor.dashboard');
     return view('pengguna.dashboard');
 })->name('dashboard');
-
-//VerifikasiKonselorController::class
-use App\Http\Controllers\Admin\VerifikasiKonselorController;
-
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/verifikasi-konselor', [VerifikasiKonselorController::class, 'index'])->name('konselor.index');
-    Route::patch('/verifikasi-konselor/{id}', [VerifikasiKonselorController::class, 'update'])->name('konselor.update');
-});
