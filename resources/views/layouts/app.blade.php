@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{{ $title ?? 'Ruang Puan — Ruang Aman, Edukasi & Konsultasi Pemberdayaan Perempuan' }}</title>
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800|fraunces:400,600,700&display=swap" rel="stylesheet" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="bg-cream-50 text-ink-900 font-sans antialiased min-h-screen flex flex-col selection:bg-berry-100 selection:text-berry-900" x-data="{ mobileMenuOpen: false }">
@@ -89,11 +89,13 @@
         @endif
 
         <!-- Main Content -->
-        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main class="flex-1 @hasSection('header-nav') @else max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 @endif">
             @yield('content')
         </main>
 
-        <!-- Professional Footer -->
+        <!-- Professional Footer (hidden when beranda provides its own) -->
+        @hasSection('header-nav')
+        @else
         <footer class="bg-berry-900 text-cream-100 py-12 mt-auto">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                 <div class="space-y-3">
@@ -127,5 +129,6 @@
                 &copy; {{ date('Y') }} Ruang Puan. Seluruh hak cipta dilindungi undang-undang.
             </div>
         </footer>
+        @endif
     </body>
 </html>

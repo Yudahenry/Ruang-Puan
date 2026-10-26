@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Pengguna\LaporanController;
 use App\Http\Controllers\Admin\AdminLaporanController;
 use App\Http\Controllers\EdukasiController;
@@ -28,6 +31,17 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('verify-email', EmailVerificationPromptController::class)
+        ->name('verification.notice');
+
+    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+
+    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
 });
 
 // Public / Guest accessible Edukasi & Direktori
@@ -72,9 +86,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 // Role-based protected dashboards
 Route::middleware(['auth', 'verified', 'role:pengguna'])->prefix('pengguna')->name('pengguna.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('pengguna.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\Pengguna\BerandaController::class, 'index'])->name('dashboard');
 });
 
 Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->name('konselor.')->group(function () {
@@ -94,7 +106,7 @@ Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
     $user = auth()->user();
     if ($user->role === 'admin') return redirect()->route('admin.dashboard');
     if ($user->role === 'konselor') return redirect()->route('konselor.dashboard');
-    return view('pengguna.dashboard');
+    return redirect()->route('pengguna.dashboard');
 })->name('dashboard');
 
 //VerifikasiKonselorController::class
