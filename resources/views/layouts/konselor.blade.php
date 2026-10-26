@@ -7,18 +7,19 @@
             <a href="{{ url('/') }}" class="text-xl font-bold tracking-tight text-white hover:text-lavender-200 transition">
                 Ruang Puan <span class="text-xs font-normal text-lavender-200">| Area Konselor</span>
             </a>
-            <nav class="hidden md:flex space-x-4">
-                <a href="#" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-lavender-400 text-cream-100 transition">Jadwal Saya</a>
-                <a href="#" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-lavender-400 text-cream-100 transition">Booking Masuk</a>
-                <a href="#" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-lavender-400 text-cream-100 transition">Sesi Chat</a>
-                <a href="#" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-lavender-400 text-cream-100 transition">Riwayat</a>
+            <nav class="hidden md:flex space-x-2 text-sm">
+                <a href="{{ route('konselor.dashboard') }}" class="px-3 py-1.5 rounded-lg font-medium transition-all duration-200 active:scale-[0.98] {{ request()->routeIs('konselor.dashboard') ? 'bg-lavender-400 text-white shadow-sm' : 'hover:bg-lavender-400/60 text-cream-100' }}">Dashboard</a>
+                <a href="{{ route('profile.edit') }}" class="px-3 py-1.5 rounded-lg font-medium transition-all duration-200 active:scale-[0.98] {{ request()->routeIs('profile.edit') ? 'bg-lavender-400 text-white shadow-sm' : 'hover:bg-lavender-400/60 text-cream-100' }}">Dokumen & Profil</a>
             </nav>
         </div>
         <div class="flex items-center space-x-4">
-            <span class="text-sm text-cream-100">Konselor: {{ auth()->user()->nama ?? 'Konselor' }}</span>
+            <a href="{{ route('profile.edit') }}" class="text-xs text-lavender-100 hover:text-white transition flex items-center space-x-1.5">
+                <span>👩‍⚕️</span>
+                <span class="hidden sm:inline font-medium">{{ auth()->user()->nama ?? 'Konselor' }}</span>
+            </a>
             <form method="POST" action="{{ route('logout') }}" class="inline">
                 @csrf
-                <button type="submit" class="text-sm px-3 py-1.5 rounded-lg bg-berry-900 hover:bg-berry-700 text-white transition font-medium">
+                <button type="submit" class="text-xs px-3 py-1.5 rounded-lg bg-berry-900 hover:bg-berry-700 text-white transition-all duration-200 active:scale-[0.98] font-medium shadow-sm">
                     Keluar
                 </button>
             </form>
