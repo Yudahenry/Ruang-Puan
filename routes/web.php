@@ -18,13 +18,30 @@ use App\Http\Controllers\Admin\AdminDirektoriController;
 use App\Http\Controllers\Admin\AdminKonselorController;
 use App\Http\Controllers\Admin\VerifikasiKonselorController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
 // ==========================================
-// AUTHENTICATION & EMAIL VERIFICATION ROUTES
+// 1. AUTHENTICATION KHUSUS ADMIN
+// ==========================================
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Guest Admin (Belum Login)
+    Route::middleware('guest:admin')->group(function () {
+        Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
+    });
+
+    // Protected Admin (Sudah Login via Guard Admin)
+    Route::middleware('auth:admin')->group(function () {
+        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+    });
+});
+
+// ==========================================
+// 2. AUTHENTICATION & EMAIL VERIFICATION ROUTES (PENGGUNA/KONSELOR)
 // ==========================================
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
@@ -39,7 +56,6 @@ Route::middleware('auth')->group(function () {
     Route::get('profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');
 
-
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 
@@ -53,14 +69,14 @@ Route::middleware('auth')->group(function () {
 });
 
 // ==========================================
-// PUBLIC ROUTES
+// 3. PUBLIC ROUTES
 // ==========================================
 Route::get('/edukasi', [EdukasiController::class, 'index'])->name('edukasi.index');
 Route::get('/edukasi/{id}', [EdukasiController::class, 'show'])->name('edukasi.show');
 Route::get('/direktori', [DirektoriController::class, 'index'])->name('direktori.index');
 
 // ==========================================
-// PENGGUNA ROUTES
+// 4. PENGGUNA ROUTES
 // ==========================================
 Route::middleware(['auth', 'role:pengguna'])->prefix('pelaporan')->name('pelaporan.')->group(function () {
     Route::get('/buat', [LaporanController::class, 'create'])->name('buat');
@@ -71,7 +87,7 @@ Route::middleware(['auth', 'role:pengguna'])->prefix('pelaporan')->name('pelapor
 Route::middleware(['auth'])->get('/pelaporan/lacak/{kode}', [LaporanController::class, 'lacak'])->name('pelaporan.lacak');
 
 // ==========================================
-// ADMIN ROUTES
+// 5. ADMIN ROUTES (MANAJEMEN KONTEN & LAPORAN)
 // ==========================================
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     // Admin Laporan
@@ -93,18 +109,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/direktori', [AdminDirektoriController::class, 'store'])->name('direktori.store');
     Route::delete('/direktori/{id}', [AdminDirektoriController::class, 'destroy'])->name('direktori.destroy');
 
-    // Admin Konselor & Verifikasi Konselor (Digabung & Dirapikan)
+    // Admin Konselor
     Route::get('/konselor', [AdminKonselorController::class, 'index'])->name('konselor.index');
     Route::post('/konselor/{id}/verifikasi', [AdminKonselorController::class, 'verifikasi'])->name('konselor.verifikasi');
     Route::post('/konselor/{id}/tolak', [AdminKonselorController::class, 'tolak'])->name('konselor.tolak');
 
-    // Verifikasi Konselor Controller (Halaman yang baru kamu buat)
+    // Verifikasi Konselor
     Route::get('/verifikasi-konselor', [VerifikasiKonselorController::class, 'index'])->name('verifikasi.index');
     Route::patch('/verifikasi-konselor/{id}', [VerifikasiKonselorController::class, 'update'])->name('konselor.update');
 });
 
 // ==========================================
-// ROLE-BASED DASHBOARDS (Verified)
+// 6. ROLE-BASED DASHBOARDS & REDIRECT
 // ==========================================
 Route::middleware(['auth', 'verified', 'role:pengguna'])->prefix('pengguna')->name('pengguna.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Pengguna\BerandaController::class, 'index'])->name('dashboard');
@@ -122,24 +138,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     })->name('dashboard');
 });
 
-// General dashboard fallback for authenticated users
-Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
-    $user = auth()->user();
-    if ($user->role === 'admin') return redirect()->route('admin.dashboard');
-    if ($user->role === 'konselor') return redirect()->route('konselor.dashboard');
-
-    return redirect()->route('pengguna.dashboard');
-})->name('dashboard');
-
-//VerifikasiKonselorController::class
-
-// 1. Group Rute Admin (Verifikasi Konselor)
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/verifikasi-konselor', [VerifikasiKonselorController::class, 'index'])->name('konselor.index');
-    Route::patch('/verifikasi-konselor/{id}', [VerifikasiKonselorController::class, 'update'])->name('konselor.update');
-});
-
-// 2. Rute Dashboard Utama (Otomatis arahkan berdasarkan Role)
+// General Dashboard Fallback (Otomatis arahkan berdasarkan Role)
 Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
     $user = auth()->user();
 

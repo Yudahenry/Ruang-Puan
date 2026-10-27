@@ -2,29 +2,29 @@
 
 @section('content')
 <div class="max-w-md mx-auto bg-white rounded-xl shadow-sm border border-cream-200 p-6 sm:p-8 my-8 transition-shadow duration-200 hover:shadow-md" 
-     x-data="{ 
-         nama: '{{ old('nama') }}',
-         email: '{{ old('email') }}', 
-         role: '{{ old('role', 'pengguna') }}',
-         password: '', 
-         password_confirmation: '',
-         loading: false,
-         emailError() {
-             if (!this.email) return '';
-             if (!this.email.includes('@') || !this.email.includes('.')) return 'Format email belum valid.';
-             return '';
-         },
-         passwordError() {
-             if (!this.password) return '';
-             if (this.password.length < 8) return 'Kata sandi minimal 8 karakter.';
-             return '';
-         },
-         confirmError() {
-             if (!this.password_confirmation) return '';
-             if (this.password !== this.password_confirmation) return 'Konfirmasi kata sandi tidak cocok.';
-             return '';
-         }
-     }">
+    x-data="{ 
+        nama: '{{ old('nama') }}',
+        email: '{{ old('email') }}', 
+        role: '{{ old('role', 'pengguna') }}',
+        password: '', 
+        password_confirmation: '',
+        loading: false,
+        emailError() {
+            if (!this.email) return '';
+            if (!this.email.includes('@') || !this.email.includes('.')) return 'Format email belum valid.';
+            return '';
+        },
+        passwordError() {
+            if (!this.password) return '';
+            if (this.password.length < 8) return 'Kata sandi minimal 8 karakter.';
+            return '';
+        },
+        confirmError() {
+            if (!this.password_confirmation) return '';
+            if (this.password !== this.password_confirmation) return 'Konfirmasi kata sandi tidak cocok.';
+            return '';
+        }
+    }">
     <div class="text-center mb-6">
         <h1 class="text-2xl font-bold text-berry-900 tracking-tight">Pendaftaran Akun</h1>
         <p class="text-xs text-ink-600 mt-1">Bergabung dengan Ruang Puan untuk pelaporan & konsultasi aman.</p>
@@ -62,6 +62,7 @@
                 class="w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2 text-ink-900 border text-sm transition">
                 <option value="pengguna">Pengguna / Pelapor</option>
                 <option value="konselor">Konselor / Psikolog</option>
+                <option value="admin">Administrator</option> <!-- Opsi Admin ditambahkan di sini -->
             </select>
         </div>
 

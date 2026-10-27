@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Admin; // <-- Tambahan untuk Model Admin
 
 return [
 
@@ -42,6 +43,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // <-- TAMBAHAN GUARD ADMIN -->
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admins',
+        ],
     ],
 
     /*
@@ -67,10 +74,11 @@ return [
             'model' => env('AUTH_MODEL', User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        // <-- TAMBAHAN PROVIDER ADMIN -->
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => Admin::class,
+        ],
     ],
 
     /*
@@ -113,5 +121,5 @@ return [
     */
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
-
+    
 ];
