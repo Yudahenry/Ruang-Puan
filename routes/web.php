@@ -155,3 +155,7 @@ Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
 
     return redirect()->route('pengguna.dashboard');
 })->name('dashboard');
+
+Route::middleware(['auth', 'verified'])->get('/beranda', function () {
+    return redirect()->route('pengguna.dashboard');
+})->name('beranda');

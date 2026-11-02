@@ -17,10 +17,10 @@
 
     {{-- Tengah: Nav Links dalam pill --}}
     <div class="hidden md:flex items-center space-x-1 bg-sage-100/60 p-1 rounded-full border border-sage-200/80">
-        <a href="{{ route('pengguna.dashboard') }}" class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->routeIs('pengguna.dashboard') ? 'bg-sage-700 text-white shadow-sm font-semibold' : 'text-sage-600 hover:text-sage-900 hover:bg-sage-100' }}">Beranda</a>
-        <a href="{{ route('pelaporan.buat') }}" class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->routeIs('pelaporan.*') ? 'bg-sage-700 text-white shadow-sm font-semibold' : 'text-sage-600 hover:text-sage-900 hover:bg-sage-100' }}">Pelaporan</a>
-        <a href="{{ route('edukasi.index') }}" class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->routeIs('edukasi.*') ? 'bg-sage-700 text-white shadow-sm font-semibold' : 'text-sage-600 hover:text-sage-900 hover:bg-sage-100' }}">Edukasi</a>
-        <a href="{{ route('direktori.index') }}" class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->routeIs('direktori.*') ? 'bg-sage-700 text-white shadow-sm font-semibold' : 'text-sage-600 hover:text-sage-900 hover:bg-sage-100' }}">Konsultasi</a>
+        <a href="{{ route('pengguna.dashboard') }}" class="px-5 py-2 rounded-full text-sm transition-all duration-200 {{ request()->routeIs('pengguna.dashboard') ? 'bg-sage-150 text-sage-900 font-medium shadow-xs' : 'text-sage-600 hover:text-sage-900 hover:bg-sage-100/70' }}">Beranda</a>
+        <a href="{{ route('pelaporan.buat') }}" class="px-5 py-2 rounded-full text-sm transition-all duration-200 {{ request()->routeIs('pelaporan.*') ? 'bg-sage-150 text-sage-900 font-medium shadow-xs' : 'text-sage-600 hover:text-sage-900 hover:bg-sage-100/70' }}">Pelaporan</a>
+        <a href="{{ route('edukasi.index') }}" class="px-5 py-2 rounded-full text-sm transition-all duration-200 {{ request()->routeIs('edukasi.*') ? 'bg-sage-150 text-sage-900 font-medium shadow-xs' : 'text-sage-600 hover:text-sage-900 hover:bg-sage-100/70' }}">Edukasi</a>
+        <a href="{{ route('direktori.index') }}" class="px-5 py-2 rounded-full text-sm transition-all duration-200 {{ request()->routeIs('direktori.*') ? 'bg-sage-150 text-sage-900 font-medium shadow-xs' : 'text-sage-600 hover:text-sage-900 hover:bg-sage-100/70' }}">Konsultasi</a>
     </div>
 
     {{-- Kanan: Notifikasi + Profile --}}
