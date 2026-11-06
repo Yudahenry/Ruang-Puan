@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Pengguna;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreLaporanRequest;
 use App\Models\Laporan;
 use App\Models\BuktiLaporan;
 use Illuminate\Http\Request;
@@ -22,27 +23,42 @@ class LaporanController extends Controller
         return view('pelaporan.buat');
     }
 
-    public function store(Request $request)
+    public function store(StoreLaporanRequest $request)
     {
-        $request->validate([
-            'jenis_kasus' => ['required', 'in:kekerasan_fisik,kekerasan_psikis,kekerasan_seksual,kdrt,kekerasan_online,lainnya'],
-            'kronologi' => ['required', 'string'],
-            'waktu_kejadian' => ['nullable', 'date'],
-            'lokasi_kejadian' => ['nullable', 'string', 'max:255'],
-            'anonim' => ['boolean'],
-            'bukti.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf,mp4,mov', 'max:10240'],
-        ]);
+        $validated = $request->validated();
+
+        $waktuKejadian = null;
+        if (!empty($validated['tanggal_kejadian'])) {
+            $waktuStr = !empty($validated['waktu_kejadian']) ? trim($validated['waktu_kejadian']) : null;
+            if ($waktuStr) {
+                try {
+                    $waktuKejadian = \Carbon\Carbon::parse($validated['tanggal_kejadian'] . ' ' . $waktuStr);
+                } catch (\Exception $e) {
+                    try {
+                        $waktuKejadian = \Carbon\Carbon::parse($validated['tanggal_kejadian']);
+                    } catch (\Exception $e2) {
+                        $waktuKejadian = null;
+                    }
+                }
+            } else {
+                try {
+                    $waktuKejadian = \Carbon\Carbon::parse($validated['tanggal_kejadian']);
+                } catch (\Exception $e) {
+                    $waktuKejadian = null;
+                }
+            }
+        }
 
         $kodePelacakan = 'RP-' . strtoupper(Str::random(8));
 
         $laporan = Laporan::create([
             'user_id' => auth()->id(),
             'kode_pelacakan' => $kodePelacakan,
-            'jenis_kasus' => $request->jenis_kasus,
-            'kronologi' => $request->kronologi,
-            'waktu_kejadian' => $request->waktu_kejadian,
-            'lokasi_kejadian' => $request->lokasi_kejadian,
-            'anonim' => $request->boolean('anonim'),
+            'jenis_kasus' => $validated['jenis_kasus'],
+            'kronologi' => $validated['kronologi'],
+            'waktu_kejadian' => $waktuKejadian,
+            'lokasi_kejadian' => $validated['lokasi_kejadian'],
+            'anonim' => $request->boolean('anonim', true),
             'status' => 'diterima',
         ]);
 
@@ -60,7 +76,7 @@ class LaporanController extends Controller
         }
 
         return redirect()->route('pelaporan.lacak', $kodePelacakan)
-                         ->with('success', 'Laporan berhasil dibuat. Simpan kode pelacakan Anda.');
+                         ->with('success', 'Laporan berhasil dibuat dengan kode pelacakan ' . $kodePelacakan . '. Simpan kode ini untuk memantau status laporan Anda.');
     }
 
     public function lacak($kode)

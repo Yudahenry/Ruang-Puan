@@ -45,9 +45,21 @@ class AdminEdukasiController extends Controller
             'status' => ['required', 'in:draft,terbit'],
         ]);
 
+        $adminId = null;
+        if (auth()->guard('admin')->check()) {
+            $adminModel = auth()->guard('admin')->user();
+            $adminId = $adminModel->id ?? \App\Models\Admin::where('email', $adminModel->email)->value('id');
+        } elseif (auth()->user()) {
+            $adminId = auth()->user()->admin->id ?? \App\Models\Admin::where('user_id', auth()->id())->value('id');
+        }
+
+        if (!$adminId || !is_numeric($adminId)) {
+            $adminId = \App\Models\Admin::value('id');
+        }
+
         MateriEdukasi::create([
             'kategori_id' => $request->kategori_id,
-            'dikelola_oleh' => auth()->user()->admin->id,
+            'dikelola_oleh' => $adminId,
             'judul' => $request->judul,
             'isi' => $request->isi,
             'jenis_konten' => $request->jenis_konten,

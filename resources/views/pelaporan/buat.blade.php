@@ -1,88 +1,145 @@
 @extends('layouts.pengguna')
 
 @section('pengguna-content')
-<div class="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border border-cream-200 p-6 sm:p-8 my-6 transition-shadow duration-200 hover:shadow-md"
-     x-data="{ loading: false }">
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-berry-900 tracking-tight">Buat Laporan Kasus</h1>
-        <p class="text-sm text-ink-600 mt-1">Sampaikan laporan Anda dengan aman. Anda dapat memilih mode anonim untuk menyembunyikan identitas Anda dari admin.</p>
+<div class="bg-cream-50 min-h-screen text-ink-900 pb-16">
+    {{-- 1. NAVBAR --}}
+    <x-beranda.navbar />
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {{-- 2. BREADCRUMB --}}
+        <nav class="flex items-center gap-2 text-xs text-sage-500 py-3 mb-2" aria-label="Breadcrumb">
+            <a href="{{ route('beranda') }}" class="hover:text-sage-700 transition">Beranda</a>
+            <svg class="w-3.5 h-3.5 text-sage-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+            <span class="text-sage-500">Pelaporan</span>
+            <svg class="w-3.5 h-3.5 text-sage-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+            <span class="text-sage-800 font-semibold" aria-current="page">Buat laporan baru</span>
+        </nav>
+
+        {{-- 3. PAGE HEADER --}}
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
+            <div>
+                <h1 class="font-fraunces text-4xl sm:text-5xl font-normal text-sage-900 tracking-tight">
+                    Buat laporan
+                </h1>
+                <p class="text-sm text-sage-600 mt-2 max-w-2xl leading-relaxed">
+                    Ceritakan yang kamu alami, dengan caramu sendiri. Ambil waktu yang kamu butuhkan.
+                </p>
+            </div>
+
+            <div class="flex-shrink-0">
+                <a href="{{ route('pelaporan.riwayat') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-sage-300 bg-white hover:bg-sage-50 text-xs font-semibold text-sage-800 shadow-xs transition-all duration-200">
+                    <span>Riwayat laporan</span>
+                    <svg class="w-4 h-4 text-sage-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        {{-- 4. LAYOUT 2 KOLOM --}}
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {{-- FORM UTAMA (KOLOM KIRI ~ 8 cols / 2/3) --}}
+            <div class="lg:col-span-8 bg-white rounded-2xl border border-sage-200/80 p-6 sm:p-10 shadow-xs" x-data="{ submitting: false }">
+                
+                @if($errors->any())
+                    <div class="mb-8 bg-danger-100 border border-danger-600 text-danger-600 p-4 rounded-xl text-xs">
+                        <p class="font-bold mb-1">Ada beberapa hal yang perlu kamu lengkapi:</p>
+                        <ul class="list-disc list-inside space-y-0.5">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('pelaporan.store') }}" enctype="multipart/form-data" @submit="submitting = true" class="space-y-8">
+                    @csrf
+
+                    {{-- SECTION 01: Identitas / Cara Melapor --}}
+                    <x-pelaporan.form-identitas />
+
+                    <div class="border-t border-sage-100"></div>
+
+                    {{-- SECTION 02: Kronologi Kejadian --}}
+                    <x-pelaporan.form-kronologi />
+
+                    <div class="border-t border-sage-100"></div>
+
+                    {{-- SECTION 03: Bukti --}}
+                    <x-pelaporan.form-bukti />
+
+                    <div class="border-t border-sage-100"></div>
+
+                    {{-- INFO BOX --}}
+                    <div class="bg-sage-100/90 border border-sage-200/80 rounded-xl p-5 flex items-start gap-3.5">
+                        <div class="w-6 h-6 rounded-lg bg-sage-200/80 text-sage-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg class="w-4 h-4 text-sage-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-sage-900 leading-snug">Apa yang terjadi setelah kamu mengirim?</h4>
+                            <p class="text-xs text-sage-600 mt-1 leading-relaxed">
+                                Kode pelacakan unik akan dibuat setelah laporan dikirim. Kamu dapat melihat kode dan memantau pembaruan status melalui Riwayat laporan.
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- FOOTER AKSI --}}
+                    <div class="flex items-center justify-between pt-2">
+                        <a href="{{ route('beranda') }}" class="inline-flex items-center gap-1.5 text-xs font-medium text-sage-700 hover:text-sage-900 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            <span>Kembali ke beranda</span>
+                        </a>
+
+                        <button 
+                            type="submit" 
+                            :disabled="submitting"
+                            class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-sage-700 hover:bg-sage-900 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all duration-200 active:scale-[0.98] disabled:opacity-75 disabled:cursor-not-allowed">
+                            <span x-show="!submitting">Kirim laporan &rarr;</span>
+                            <span x-show="submitting" class="inline-flex items-center gap-2" style="display: none;">
+                                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Mengirim laporan...</span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- SIDEBAR (KOLOM KANAN ~ 4 cols / 1/3, STICKY top-24) --}}
+            <aside class="lg:col-span-4 lg:sticky lg:top-24 space-y-4">
+                {{-- Card 1: Tips & Tenang --}}
+                <x-pelaporan.sidebar-tips />
+
+                {{-- Card 2: Tentang Anonim --}}
+                <x-pelaporan.sidebar-anonim />
+
+                {{-- Card 3: Pantau Langkahmu --}}
+                <x-pelaporan.sidebar-riwayat />
+
+                {{-- Disclaimer di bawah sidebar cards --}}
+                <div class="px-1 pt-1 flex items-start gap-2.5 text-xs text-sage-500 leading-relaxed">
+                    <svg class="w-4 h-4 text-sage-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-[11px] text-sage-500">
+                        Ruang Puan memfasilitasi pelaporan dan pemantauan, bukan penanganan kasus langsung. Jika kamu berada dalam bahaya langsung, hubungi layanan darurat atau lembaga bantuan setempat.
+                    </p>
+                </div>
+            </aside>
+        </div>
     </div>
 
-    @if($errors->any())
-        <div class="mb-6 bg-danger-100 border border-danger-600 text-danger-600 p-4 rounded-xl text-sm">
-            <ul class="list-disc list-inside">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <form method="POST" action="{{ route('pelaporan.store') }}" enctype="multipart/form-data" @submit="loading = true" class="space-y-6">
-        @csrf
-
-        <div>
-            <label for="jenis_kasus" class="block text-sm font-semibold text-ink-900 mb-1">Jenis Kasus</label>
-            <select id="jenis_kasus" name="jenis_kasus" required
-                class="w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2.5 text-ink-900 border text-sm transition">
-                <option value="">-- Pilih Jenis Kasus --</option>
-                <option value="kekerasan_fisik" @selected(old('jenis_kasus') == 'kekerasan_fisik')>Kekerasan Fisik</option>
-                <option value="kekerasan_psikis" @selected(old('jenis_kasus') == 'kekerasan_psikis')>Kekerasan Psikis</option>
-                <option value="kekerasan_seksual" @selected(old('jenis_kasus') == 'kekerasan_seksual')>Kekerasan Seksual</option>
-                <option value="kdrt" @selected(old('jenis_kasus') == 'kdrt')>KDRT (Kekerasan Dalam Rumah Tangga)</option>
-                <option value="kekerasan_online" @selected(old('jenis_kasus') == 'kekerasan_online')>Kekerasan Berbasis Gender Online (KBGO)</option>
-                <option value="lainnya" @selected(old('jenis_kasus') == 'lainnya')>Lainnya</option>
-            </select>
-        </div>
-
-        <div>
-            <label for="kronologi" class="block text-sm font-semibold text-ink-900 mb-1">Kronologi Kejadian</label>
-            <textarea id="kronologi" name="kronologi" rows="5" required placeholder="Ceritakan kronologi kejadian secara detail..."
-                class="w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2.5 text-ink-900 border text-sm transition">{{ old('kronologi') }}</textarea>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label for="waktu_kejadian" class="block text-sm font-semibold text-ink-900 mb-1">Waktu Kejadian (Opsional)</label>
-                <input id="waktu_kejadian" type="datetime-local" name="waktu_kejadian" value="{{ old('waktu_kejadian') }}"
-                    class="w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2.5 text-ink-900 border text-sm transition">
-            </div>
-            <div>
-                <label for="lokasi_kejadian" class="block text-sm font-semibold text-ink-900 mb-1">Lokasi Kejadian (Opsional)</label>
-                <input id="lokasi_kejadian" type="text" name="lokasi_kejadian" value="{{ old('lokasi_kejadian') }}" placeholder="Contoh: Jakarta Selatan"
-                    class="w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2.5 text-ink-900 border text-sm transition">
-            </div>
-        </div>
-
-        <div>
-            <label for="bukti" class="block text-sm font-semibold text-ink-900 mb-1">Bukti Pendukung (Foto, PDF, Video - Maks 10MB per file)</label>
-            <input id="bukti" type="file" name="bukti[]" multiple
-                class="w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2 text-ink-900 border text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-berry-700 file:text-white hover:file:bg-berry-900 transition">
-        </div>
-
-        <div class="bg-cream-50 p-4 rounded-xl border border-cream-200 flex items-start space-x-3">
-            <input type="checkbox" id="anonim" name="anonim" value="1" @checked(old('anonim'))
-                class="mt-1 rounded border-cream-200 text-berry-700 focus:ring-berry-500">
-            <div>
-                <label for="anonim" class="font-bold text-sm text-berry-900 block">Kirim sebagai Laporan Anonim</label>
-                <p class="text-xs text-ink-600 mt-0.5">Identitas asli Anda akan disembunyikan dari admin dan peninjau (NFR-05). Anda tetap dapat memantau riwayat dan status laporan ini di akun Anda.</p>
-            </div>
-        </div>
-
-        <div class="flex items-center justify-end space-x-4 pt-4 border-t border-cream-200">
-            <a href="{{ route('pelaporan.riwayat') }}" class="px-4 py-2 text-sm text-ink-600 hover:text-berry-700 font-medium transition-all duration-200 active:scale-[0.98]">Batal</a>
-            <button type="submit" :disabled="loading" 
-                    class="px-6 py-2.5 bg-berry-700 hover:bg-berry-900 text-white font-medium rounded-lg text-sm shadow-sm transition-all duration-200 active:scale-[0.98] flex items-center space-x-2">
-                <span x-show="!loading">Kirim Laporan</span>
-                <span x-show="loading" class="inline-flex items-center space-x-2" style="display: none;">
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Memproses...</span>
-                </span>
-            </button>
-        </div>
-    </form>
+    {{-- 5. FOOTER --}}
+    <x-pelaporan.footer />
 </div>
 @endsection

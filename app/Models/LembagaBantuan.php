@@ -14,6 +14,9 @@ class LembagaBantuan extends Model
         'wilayah',
         'kontak',
         'alamat',
+        'deskripsi',
+        'website',
+        'status',
         'dikelola_oleh',
     ];
 

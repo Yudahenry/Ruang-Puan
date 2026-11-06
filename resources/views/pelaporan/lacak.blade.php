@@ -2,6 +2,25 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-cream-200 p-8 my-8">
+    @if(session('success'))
+        <div class="mb-6 bg-sage-100/90 border border-sage-700/40 text-sage-900 p-5 rounded-2xl">
+            <div class="flex items-start gap-3.5">
+                <div class="w-8 h-8 rounded-full bg-sage-700 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-sage-900">Laporan Berhasil Terkirim</h2>
+                    <p class="text-xs text-sage-600 mt-1">Kode pelacakan unik telah dibuat. Simpan atau catat kode ini untuk memantau status laporan Anda:</p>
+                    <div class="mt-2.5 inline-flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-xl border border-sage-300 font-mono text-base font-bold text-sage-900">
+                        <span>{{ $laporan->kode_pelacakan }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="flex items-center justify-between mb-6 pb-4 border-b border-cream-200">
         <div>
             <h1 class="text-2xl font-bold text-berry-900">Pelacakan Laporan</h1>

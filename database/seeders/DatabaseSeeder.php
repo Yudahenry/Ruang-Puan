@@ -25,7 +25,19 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $admin = Admin::firstOrCreate(['user_id' => $adminUser->id]);
+        $admin = Admin::firstOrCreate(
+            ['user_id' => $adminUser->id],
+            [
+                'email' => 'admin@ruangpuan.test',
+                'password' => Hash::make('password123'),
+            ]
+        );
+        if (empty($admin->email)) {
+            $admin->update([
+                'email' => 'admin@ruangpuan.test',
+                'password' => Hash::make('password123'),
+            ]);
+        }
 
         // 2. 4 Kategori Edukasi Awal
         $kategoris = [

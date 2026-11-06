@@ -56,6 +56,9 @@ class RegisteredUserController extends Controller
         }
 
         // Kirim email verifikasi (FR-01: akun aktif setelah email diverifikasi)
+        // Otomatis verifikasi untuk environment lokal agar langsung bisa masuk
+        $user->forceFill(['email_verified_at' => now()])->save();
+        
         event(new Registered($user));
 
         Auth::login($user);

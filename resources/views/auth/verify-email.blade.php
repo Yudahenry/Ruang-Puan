@@ -14,9 +14,9 @@
     @endif
 
     <div class="flex items-center justify-between mt-4">
-        <form method="POST" action="{{ route('verification.send') }}">
+        <form method="POST" action="{{ route('verification.send') }}" onsubmit="const btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.innerText = 'Mengirim...';">
             @csrf
-            <button type="submit" class="py-2 px-4 bg-berry-700 hover:bg-berry-900 text-white font-medium rounded-lg text-sm transition">
+            <button type="submit" class="py-2 px-4 bg-berry-700 hover:bg-berry-900 text-white font-medium rounded-lg text-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
                 Kirim Ulang Email Verifikasi
             </button>
         </form>
