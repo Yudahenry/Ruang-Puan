@@ -27,8 +27,6 @@ class ProfileController extends Controller
             'dokumen_verifikasi' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
         ]);
 
-        $emailBerubah = $request->email !== $user->email;
-
         $user->update([
             'nama' => $request->nama,
             'email' => $request->email,
@@ -53,15 +51,6 @@ class ProfileController extends Controller
                 ['user_id' => $user->id],
                 $konselorData
             );
-        }
-
-        // Email diganti: wajib verifikasi ulang ke alamat baru
-        if ($emailBerubah) {
-            $user->forceFill(['email_verified_at' => null])->save();
-            $user->sendEmailVerificationNotification();
-
-            return redirect()->route('verification.notice')
-                ->with('success', 'Email diubah. Silakan verifikasi alamat email baru Anda.');
         }
 
         return back()->with('success', 'Profil dan dokumen berhasil diperbarui.');

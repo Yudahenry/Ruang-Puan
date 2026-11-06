@@ -20,8 +20,6 @@ use App\Http\Controllers\Admin\VerifikasiKonselorController;
 use App\Http\Controllers\Admin\AdminUserController; // <-- Import AdminUserController
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
-use App\Http\Controllers\Pengguna\KonsultasiController;
-use App\Http\Controllers\Konselor\JadwalKonsultasiController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -31,18 +29,20 @@ Route::get('/', function () {
 // 1. AUTHENTICATION KHUSUS ADMIN
 // ==========================================
 Route::prefix('admin')->name('admin.')->group(function () {
+    // Guest Admin (Belum Login)
     Route::middleware('guest:admin')->group(function () {
         Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
     });
 
+    // Protected Admin (Sudah Login via Guard Admin)
     Route::middleware('auth:admin')->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
     });
 });
 
 // ==========================================
-// 2. AUTHENTICATION & EMAIL VERIFICATION
+// 2. AUTHENTICATION & EMAIL VERIFICATION ROUTES (PENGGUNA/KONSELOR)
 // ==========================================
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
@@ -57,7 +57,6 @@ Route::match(['get', 'post'], 'logout', [AuthenticatedSessionController::class, 
 Route::middleware('auth')->group(function () {
     Route::get('profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');
-    Route::put('profil/password', [\App\Http\Controllers\ProfilePasswordController::class, 'update'])->name('profile.password');
 
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
@@ -72,23 +71,14 @@ Route::middleware('auth')->group(function () {
 });
 
 // ==========================================
-// 3. FITUR KONSULTASI (PENGGUNA)
-// ==========================================
-Route::middleware(['auth'])->prefix('konsultasi')->name('konsultasi.')->group(function () {
-    Route::get('/', [KonsultasiController::class, 'index'])->name('index');
-    Route::get('/pilih/{konselor}', [KonsultasiController::class, 'pilihJadwal'])->name('jadwal');
-    Route::post('/store', [KonsultasiController::class, 'store'])->name('store');
-});
-
-// ==========================================
-// 4. PUBLIC ROUTES
+// 3. PUBLIC ROUTES
 // ==========================================
 Route::get('/edukasi', [EdukasiController::class, 'index'])->name('edukasi.index');
 Route::get('/edukasi/{id}', [EdukasiController::class, 'show'])->name('edukasi.show');
 Route::get('/direktori', [DirektoriController::class, 'index'])->name('direktori.index');
 
 // ==========================================
-// 5. PENGGUNA ROUTES (PELAPORAN)
+// 4. PENGGUNA ROUTES
 // ==========================================
 Route::middleware(['auth', 'role:pengguna'])->prefix('pelaporan')->name('pelaporan.')->group(function () {
     Route::get('/buat', [LaporanController::class, 'create'])->name('buat');
@@ -99,15 +89,17 @@ Route::middleware(['auth', 'role:pengguna'])->prefix('pelaporan')->name('pelapor
 Route::middleware(['auth'])->get('/pelaporan/lacak/{kode}', [LaporanController::class, 'lacak'])->name('pelaporan.lacak');
 
 // ==========================================
-// 6. ADMIN ROUTES (MANAJEMEN KONTEN & LAPORAN)
+// 5. ADMIN ROUTES (MANAJEMEN KONTEN & LAPORAN)
 // ==========================================
 Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Admin Laporan
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/', [AdminLaporanController::class, 'index'])->name('index');
         Route::get('/{id}', [AdminLaporanController::class, 'show'])->name('show');
         Route::patch('/{id}', [AdminLaporanController::class, 'updateStatus'])->name('update');
     });
 
+    // Admin Edukasi & Direktori
     Route::get('/edukasi', [AdminEdukasiController::class, 'index'])->name('edukasi.index');
     Route::get('/edukasi/create', [AdminEdukasiController::class, 'createMateri'])->name('edukasi.create');
     Route::post('/edukasi', [AdminEdukasiController::class, 'storeMateri'])->name('edukasi.store');
@@ -122,6 +114,7 @@ Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admi
     Route::patch('/direktori/{id}/toggle-status', [AdminDirektoriController::class, 'toggleStatus'])->name('direktori.toggle-status');
     Route::delete('/direktori/{id}', [AdminDirektoriController::class, 'destroy'])->name('direktori.destroy');
 
+    // Admin Konselor & Verifikasi Konselor
     Route::get('/konselor', [AdminKonselorController::class, 'index'])->name('konselor.index');
     Route::post('/konselor/{id}/verifikasi', [AdminKonselorController::class, 'verifikasi'])->name('konselor.verifikasi');
     Route::post('/konselor/{id}/tolak', [AdminKonselorController::class, 'tolak'])->name('konselor.tolak');
@@ -132,24 +125,20 @@ Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admi
     Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 });
 
+// Redirect jika user mengetik /verifikasi-konselor langsung
 Route::redirect('/verifikasi-konselor', '/admin/konselor');
 
 // ==========================================
-// 7. ROLE-BASED DASHBOARDS & REDIRECT
+// 6. ROLE-BASED DASHBOARDS & REDIRECT
 // ==========================================
 Route::middleware(['auth', 'verified', 'role:pengguna'])->prefix('pengguna')->name('pengguna.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Pengguna\BerandaController::class, 'index'])->name('dashboard');
 });
 
-// --- RUTE KONSELOR (MANAJEMEN JADWAL PRAKTIK) ---
 Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->name('konselor.')->group(function () {
     Route::get('/dashboard', function () {
         return view('konselor.dashboard');
     })->name('dashboard');
-
-    Route::get('/jadwal', [JadwalKonsultasiController::class, 'index'])->name('jadwal');
-    Route::post('/jadwal', [JadwalKonsultasiController::class, 'store'])->name('jadwal.store');
-    Route::delete('/jadwal/{id}', [JadwalKonsultasiController::class, 'destroy'])->name('jadwal.destroy');
 });
 
 Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -158,6 +147,7 @@ Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admi
     })->name('dashboard');
 });
 
+// General Dashboard Fallback (Otomatis arahkan berdasarkan Role)
 Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
     $user = auth()->user();
 

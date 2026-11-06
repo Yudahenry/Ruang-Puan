@@ -37,8 +37,8 @@
             </span>
         </a>
 
-        {{-- Card 3: Jadwalkan Konsultasi (DIUBAH KE RUTE KONSULTASI) --}}
-        <a href="{{ route('konsultasi.index') }}" class="group bg-white hover:bg-cream-50 text-sage-900 rounded-2xl px-6 py-5 shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-between border border-sage-200">
+        {{-- Card 3: Jadwalkan Konsultasi (White card) --}}
+        <a href="{{ route('edukasi.index') }}" class="group bg-white hover:bg-cream-50 text-sage-900 rounded-2xl px-6 py-5 shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-between border border-sage-200">
             <div class="flex items-center space-x-4">
                 <div class="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center text-sage-700 flex-shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

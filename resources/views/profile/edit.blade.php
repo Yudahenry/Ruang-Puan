@@ -186,41 +186,4 @@
         </div>
     </form>
 </div>
-{{-- Kartu Ubah Kata Sandi --}}
-<div class="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border border-cream-200 p-6 sm:p-8 mb-6">
-    <div class="mb-5 pb-4 border-b border-cream-200">
-        <h2 class="text-xl font-bold text-berry-900 tracking-tight">Ubah Kata Sandi</h2>
-        <p class="text-sm text-ink-600 mt-0.5">Gunakan kata sandi baru minimal 8 karakter.</p>
-    </div>
-
-    <form method="POST" action="{{ route('profile.password') }}" class="space-y-5">
-        @csrf
-        @method('PUT')
-
-        <div>
-            <label for="password_lama" class="block text-sm font-semibold text-ink-900 mb-1.5">Kata Sandi Lama</label>
-            <input id="password_lama" type="password" name="password_lama" required autocomplete="current-password"
-                class="w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2.5 text-ink-900 border text-sm transition">
-        </div>
-
-        <div>
-            <label for="password" class="block text-sm font-semibold text-ink-900 mb-1.5">Kata Sandi Baru</label>
-            <input id="password" type="password" name="password" required autocomplete="new-password"
-                class="w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2.5 text-ink-900 border text-sm transition">
-        </div>
-
-        <div>
-            <label for="password_confirmation" class="block text-sm font-semibold text-ink-900 mb-1.5">Konfirmasi Kata Sandi Baru</label>
-            <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
-                class="w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2.5 text-ink-900 border text-sm transition">
-        </div>
-
-        <div class="flex items-center justify-end pt-5 border-t border-cream-200">
-            <button type="submit"
-                class="px-6 py-2.5 bg-berry-700 hover:bg-berry-900 text-white font-medium rounded-lg text-sm shadow-sm transition-all duration-200 active:scale-[0.98]">
-                Simpan Kata Sandi
-            </button>
-        </div>
-    </form>
-</div>
 @endsection
