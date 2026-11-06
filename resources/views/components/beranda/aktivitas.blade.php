@@ -182,7 +182,8 @@
                             💬
                         </div>
                         <p class="text-xs text-sage-600">Belum ada jadwal konsultasi mendatang.</p>
-                        <a href="{{ route('edukasi.index') }}" class="inline-flex items-center px-4 py-2 bg-sage-700 hover:bg-sage-900 text-white rounded-xl text-xs font-semibold shadow-sm transition">
+                        {{-- UBAH ROUTE DI BAWAH INI MENJADI KONSULTASI.INDEX --}}
+                        <a href="{{ route('konsultasi.index') }}" class="inline-flex items-center px-4 py-2 bg-sage-700 hover:bg-sage-900 text-white rounded-xl text-xs font-semibold shadow-sm transition">
                             Jadwalkan konsultasi &rarr;
                         </a>
                     </div>

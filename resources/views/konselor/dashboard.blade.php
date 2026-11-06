@@ -33,6 +33,7 @@
     @endif
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Jadwal Praktik Konsultasi -->
         <div class="bg-cream-50/70 border border-cream-200 rounded-xl p-6 flex flex-col justify-between transition-shadow duration-200 hover:shadow-md">
             <div>
                 <div class="w-10 h-10 rounded-lg bg-lavender-200 text-lavender-600 flex items-center justify-center font-bold mb-4">
@@ -41,11 +42,20 @@
                 <h3 class="font-bold text-berry-900 text-lg mb-2">Jadwal Praktik Konsultasi</h3>
                 <p class="text-xs text-ink-600 mb-6 leading-relaxed">Atur slot ketersediaan waktu konsultasi online Anda untuk klien.</p>
             </div>
-            <button type="button" disabled class="inline-flex items-center justify-center px-4 py-2 bg-cream-200 text-ink-600 rounded-lg text-xs font-semibold cursor-not-allowed">
-                Tersedia di Modul 4 (Konsultasi)
-            </button>
+            
+            <!-- DIPERBAIKI: Mengarah ke route('konselor.jadwal') jika sudah disetujui -->
+            @if(auth()->user()->konselor && auth()->user()->konselor->status_verifikasi === 'disetujui')
+                <a href="{{ route('konselor.jadwal') }}" class="inline-flex items-center justify-center px-4 py-2 bg-berry-700 hover:bg-berry-900 text-white rounded-lg text-xs font-semibold shadow-sm transition-all duration-200 active:scale-[0.98]">
+                    Kelola Jadwal &rarr;
+                </a>
+            @else
+                <button type="button" disabled class="inline-flex items-center justify-center px-4 py-2 bg-cream-200 text-ink-600 rounded-lg text-xs font-semibold cursor-not-allowed">
+                    Menunggu Verifikasi Disetujui
+                </button>
+            @endif
         </div>
 
+        <!-- Dokumen & Profil Konselor -->
         <div class="bg-cream-50/70 border border-cream-200 rounded-xl p-6 flex flex-col justify-between transition-shadow duration-200 hover:shadow-md">
             <div>
                 <div class="w-10 h-10 rounded-lg bg-berry-100 text-berry-700 flex items-center justify-center font-bold mb-4">
