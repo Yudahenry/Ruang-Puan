@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AdminEdukasiController;
 use App\Http\Controllers\Admin\AdminDirektoriController;
 use App\Http\Controllers\Admin\AdminKonselorController;
 use App\Http\Controllers\Admin\VerifikasiKonselorController;
+use App\Http\Controllers\Admin\AdminUserController; // <-- Import AdminUserController
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 
@@ -118,6 +119,10 @@ Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admi
     Route::post('/konselor/{id}/verifikasi', [AdminKonselorController::class, 'verifikasi'])->name('konselor.verifikasi');
     Route::post('/konselor/{id}/tolak', [AdminKonselorController::class, 'tolak'])->name('konselor.tolak');
     Route::get('/verifikasi-konselor', [AdminKonselorController::class, 'index'])->name('verifikasi.index');
+
+    // Admin Manajemen User / Akun Pengguna (Baru)
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 });
 
 // Redirect jika user mengetik /verifikasi-konselor langsung
