@@ -57,6 +57,7 @@ Route::match(['get', 'post'], 'logout', [AuthenticatedSessionController::class, 
 Route::middleware('auth')->group(function () {
     Route::get('profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('profil/password', [\App\Http\Controllers\ProfilePasswordController::class, 'update'])->name('profile.password');
 
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
