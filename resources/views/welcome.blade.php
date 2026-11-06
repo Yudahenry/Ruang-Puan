@@ -240,7 +240,7 @@
                         </div>
                     </div>
 
-                    <!-- Kartu 3: Konsultasi (Dipastikan mengarah ke route konsultasi.index) -->
+                    <!-- Kartu 3: Konsultasi -->
                     <div class="bg-white rounded-xl p-8 shadow-sm border border-cream-200 hover:-translate-y-1.5 hover:shadow-xl transition-all duration-200 flex flex-col justify-between group">
                         <div>
                             <div class="w-14 h-14 rounded-lg bg-lavender-200 text-lavender-600 flex items-center justify-center mb-6 group-hover:bg-lavender-600 group-hover:text-white transition-colors duration-200">
@@ -254,7 +254,7 @@
                             </p>
                         </div>
                         <div class="pt-4 border-t border-cream-200">
-                            <a href="{{ route('konsultasi.index') }}" 
+                            <a href="{{ route('register') }}" 
                                class="inline-flex items-center space-x-2 text-sm font-semibold text-berry-700 hover:text-rose-600 group-hover:translate-x-1 transition-all duration-200">
                                 <span>Jadwalkan Konsultasi</span>
                                 <span>&rarr;</span>
