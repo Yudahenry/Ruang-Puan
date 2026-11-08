@@ -17,11 +17,12 @@ use App\Http\Controllers\Admin\AdminEdukasiController;
 use App\Http\Controllers\Admin\AdminDirektoriController;
 use App\Http\Controllers\Admin\AdminKonselorController;
 use App\Http\Controllers\Admin\VerifikasiKonselorController;
-use App\Http\Controllers\Admin\AdminUserController; // <-- Import AdminUserController
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Pengguna\KonsultasiController;
 use App\Http\Controllers\Konselor\JadwalKonsultasiController;
+use App\Http\Controllers\ChatKonsultasiController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -80,6 +81,12 @@ Route::middleware(['auth'])->prefix('konsultasi')->name('konsultasi.')->group(fu
     Route::post('/store', [KonsultasiController::class, 'store'])->name('store');
 });
 
+Route::middleware(['auth', 'verified'])->prefix('konsultasi')->name('konsultasi.')->group(function () {
+    Route::get('/{konsultasi}/chat', [ChatKonsultasiController::class, 'show'])->name('chat');
+    Route::get('/{konsultasi}/chat/pesan', [ChatKonsultasiController::class, 'pesan'])->name('chat.pesan');
+    Route::post('/{konsultasi}/chat/kirim', [ChatKonsultasiController::class, 'kirim'])->name('chat.kirim');
+});
+
 // ==========================================
 // 4. PUBLIC ROUTES
 // ==========================================
@@ -127,7 +134,7 @@ Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admi
     Route::post('/konselor/{id}/tolak', [AdminKonselorController::class, 'tolak'])->name('konselor.tolak');
     Route::get('/verifikasi-konselor', [AdminKonselorController::class, 'index'])->name('verifikasi.index');
 
-    // Admin Manajemen User / Akun Pengguna (Baru)
+    // Admin Manajemen User / Akun Pengguna
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 });
@@ -139,9 +146,23 @@ Route::redirect('/verifikasi-konselor', '/admin/konselor');
 // ==========================================
 Route::middleware(['auth', 'verified', 'role:pengguna'])->prefix('pengguna')->name('pengguna.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Pengguna\BerandaController::class, 'index'])->name('dashboard');
+
+    // Riwayat Konsultasi Pengguna
+    Route::get('/riwayat-konsultasi',
+        [\App\Http\Controllers\Pengguna\RiwayatKonsultasiController::class, 'index']
+    )->name('riwayat-konsultasi');
+
+    // Chat Pengguna
+    Route::get('/chat/{id}',
+        [\App\Http\Controllers\Pengguna\ChatController::class, 'show']
+    )->name('chat.show');
+
+    Route::post('/chat/{id}',
+        [\App\Http\Controllers\Pengguna\ChatController::class, 'store']
+    )->name('chat.store');
 });
 
-// --- RUTE KONSELOR (MANAJEMEN JADWAL PRAKTIK) ---
+// --- RUTE KONSELOR (MANAJEMEN JADWAL PRAKTIK & CHAT) ---
 Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->name('konselor.')->group(function () {
     Route::get('/dashboard', function () {
         return view('konselor.dashboard');
@@ -150,6 +171,15 @@ Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->na
     Route::get('/jadwal', [JadwalKonsultasiController::class, 'index'])->name('jadwal');
     Route::post('/jadwal', [JadwalKonsultasiController::class, 'store'])->name('jadwal.store');
     Route::delete('/jadwal/{id}', [JadwalKonsultasiController::class, 'destroy'])->name('jadwal.destroy');
+
+    // Chat Konselor
+    Route::get('/chat/{id}',
+        [\App\Http\Controllers\Konselor\ChatController::class, 'show']
+    )->name('chat.show');
+
+    Route::post('/chat/{id}',
+        [\App\Http\Controllers\Konselor\ChatController::class, 'store']
+    )->name('chat.store');
 });
 
 Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

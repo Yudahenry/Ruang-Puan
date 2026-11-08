@@ -170,10 +170,17 @@
                         {{-- Footer --}}
                         <div class="flex items-center justify-between pt-2">
                             <span class="text-xs text-sage-500">60 menit · Rp150.000</span>
-                            <a href="{{ route('pengguna.dashboard') }}" class="text-xs font-semibold text-sage-900 hover:underline flex items-center space-x-1">
-                                <span>Lihat detail sesi</span>
-                                <span>&nearr;</span>
-                            </a>
+                            @if($konsultasiMendatang->konsultasi)
+                                <a href="{{ route('konsultasi.chat', $konsultasiMendatang->konsultasi->id) }}" class="text-xs font-semibold text-sage-900 hover:underline flex items-center space-x-1">
+                                    <span>Lihat detail sesi</span>
+                                    <span>&nearr;</span>
+                                </a>
+                            @else
+                                <a href="{{ route('pengguna.riwayat-konsultasi') }}" class="text-xs font-semibold text-sage-900 hover:underline flex items-center space-x-1">
+                                    <span>Lihat detail sesi</span>
+                                    <span>&nearr;</span>
+                                </a>
+                            @endif
                         </div>
                     </div>
                 @else
