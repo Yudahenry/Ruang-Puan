@@ -97,12 +97,16 @@ Route::get('/direktori', [DirektoriController::class, 'index'])->name('direktori
 // ==========================================
 // 5. PENGGUNA ROUTES (PELAPORAN)
 // ==========================================
+// Rute Pengguna
 Route::middleware(['auth', 'role:pengguna'])->prefix('pelaporan')->name('pelaporan.')->group(function () {
     Route::get('/buat', [LaporanController::class, 'create'])->name('buat');
     Route::post('/', [LaporanController::class, 'store'])->name('store');
     Route::get('/riwayat', [LaporanController::class, 'index'])->name('riwayat');
+    Route::get('/cek', [LaporanController::class, 'cek'])->name('cek');
+    Route::get('/bukti/{id}', [LaporanController::class, 'unduhBukti'])->name('bukti');
 });
 
+// Rute Pelacakan Laporan
 Route::middleware(['auth'])->get('/pelaporan/lacak/{kode}', [LaporanController::class, 'lacak'])->name('pelaporan.lacak');
 
 // ==========================================

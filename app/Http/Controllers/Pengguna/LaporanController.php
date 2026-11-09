@@ -14,8 +14,29 @@ class LaporanController extends Controller
 {
     public function index(Request $request)
     {
-        $laporans = auth()->user()->laporans()->latest()->paginate(10);
-        return view('pelaporan.riwayat', compact('laporans'));
+        $user = auth()->user();
+
+        $query = $user->laporans()->latest();
+
+        $status = $request->query('status');
+        if ($status && in_array($status, Laporan::STATUS_LIST, true)) {
+            $query->where('status', $status);
+        }
+
+        $q = strtoupper(trim((string) $request->query('q', '')));
+        if ($q !== '') {
+            $query->where('kode_pelacakan', 'like', '%' . $q . '%');
+        }
+
+        $laporans = $query->paginate(10)->withQueryString();
+
+        $ringkasan = [
+            'total'   => $user->laporans()->count(),
+            'aktif'   => $user->laporans()->whereIn('status', ['diterima', 'diverifikasi', 'diproses', 'diteruskan_ke_lembaga'])->count(),
+            'selesai' => $user->laporans()->whereIn('status', ['selesai', 'ditutup'])->count(),
+        ];
+
+        return view('pelaporan.riwayat', compact('laporans', 'ringkasan', 'status', 'q'));
     }
 
     public function create()
@@ -64,7 +85,9 @@ class LaporanController extends Controller
 
         if ($request->hasFile('bukti')) {
             foreach ($request->file('bukti') as $file) {
-                $path = $file->store('bukti_laporan', 'public');
+                // Disk 'local' = private (storage/app), tidak bisa dibuka lewat URL langsung
+                $path = $file->store('bukti_laporan', 'local');
+
                 BuktiLaporan::create([
                     'laporan_id' => $laporan->id,
                     'nama_file' => $file->getClientOriginalName(),
@@ -79,14 +102,51 @@ class LaporanController extends Controller
                          ->with('success', 'Laporan berhasil dibuat dengan kode pelacakan ' . $kodePelacakan . '. Simpan kode ini untuk memantau status laporan Anda.');
     }
 
-    public function lacak($kode)
+    // Halaman Cek Status: pelapor memasukkan kode miliknya sendiri
+    public function cek(Request $request)
     {
-        $laporan = Laporan::with(['buktiLaporans', 'tanggapanLaporans'])->where('kode_pelacakan', $kode)->firstOrFail();
-        
-        if (auth()->user()->role === 'pengguna' && $laporan->user_id !== auth()->id()) {
-            abort(403);
+        $kode = strtoupper(trim((string) $request->query('kode', '')));
+
+        if ($kode === '') {
+            return view('pelaporan.cek', ['kode' => '', 'tidakDitemukan' => false]);
         }
 
+        $laporan = auth()->user()->laporans()->where('kode_pelacakan', $kode)->first();
+
+        if ($laporan) {
+            return redirect()->route('pelaporan.lacak', $laporan->kode_pelacakan);
+        }
+
+        return view('pelaporan.cek', ['kode' => $kode, 'tidakDitemukan' => true]);
+    }
+
+    public function lacak($kode)
+    {
+        $laporan = Laporan::with([
+            'buktiLaporans',
+            'tanggapanLaporans' => fn ($q) => $q->orderBy('id'),
+        ])->where('kode_pelacakan', $kode)->firstOrFail();
+
+        // Hanya pemilik laporan yang boleh melihat
+        abort_unless($laporan->user_id === auth()->id(), 403, 'Anda tidak memiliki akses ke laporan ini.');
+
         return view('pelaporan.lacak', compact('laporan'));
+    }
+
+    // Unduh bukti: hanya pemilik laporan
+    public function unduhBukti($id)
+    {
+        $laporan = auth()->user()->laporans()
+            ->whereHas('buktiLaporans', fn ($q) => $q->where('id', $id))
+            ->firstOrFail();
+
+        $bukti = $laporan->buktiLaporans()->findOrFail($id);
+
+        // File lama mungkin masih di disk 'public', file baru di 'local'
+        $disk = Storage::disk('local')->exists($bukti->lokasi_file) ? 'local' : 'public';
+
+        abort_unless(Storage::disk($disk)->exists($bukti->lokasi_file), 404, 'File bukti tidak ditemukan.');
+
+        return Storage::disk($disk)->download($bukti->lokasi_file, $bukti->nama_file);
     }
 }
