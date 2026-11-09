@@ -62,10 +62,17 @@
             </div>
 
             <div class="pt-6 relative z-10">
-                <a href="{{ route('pelaporan.riwayat') }}" class="inline-flex items-center space-x-2 text-xs font-semibold text-sage-900 hover:underline transition group">
-                    <span>Buka riwayat saya</span>
-                    <span class="transform group-hover:translate-x-1 transition">&nearr;</span>
-                </a>
+                <div class="flex flex-wrap items-center gap-3">
+                    <a href="{{ route('pelaporan.riwayat') }}" class="inline-flex items-center space-x-2 px-4 py-2 bg-sage-700 hover:bg-sage-800 text-white rounded-xl text-xs font-semibold shadow-sm transition group">
+                        <span>📝 Riwayat Laporan</span>
+                        <span class="transform group-hover:translate-x-1 transition">&rarr;</span>
+                    </a>
+
+                    <a href="{{ route('pengguna.riwayat-konsultasi') }}" class="inline-flex items-center space-x-2 px-4 py-2 bg-sage-700 hover:bg-sage-800 text-white rounded-xl text-xs font-semibold shadow-sm transition group">
+                        <span>📅 Riwayat Konsultasi</span>
+                        <span class="transform group-hover:translate-x-1 transition">&rarr;</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>

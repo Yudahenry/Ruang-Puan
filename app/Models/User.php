@@ -20,6 +20,15 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
         'status',
         'email_verified_at',
+        'no_hp',
+        'kota',
+        'provinsi',
+        'kontak_darurat_nama',
+        'kontak_darurat_nomor',
+        'mode_lapor_default',
+        'notif_status_laporan',
+        'notif_pengingat_konsultasi',
+        'notif_pembayaran',
     ];
 
     protected $hidden = [
@@ -32,6 +41,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            // Data sensitif dienkripsi di database
+            'no_hp' => 'encrypted',
+            'kontak_darurat_nama' => 'encrypted',
+            'kontak_darurat_nomor' => 'encrypted',
+            'notif_status_laporan' => 'boolean',
+            'notif_pengingat_konsultasi' => 'boolean',
+            'notif_pembayaran' => 'boolean',
         ];
     }
 
@@ -60,4 +76,3 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Notifikasi::class);
     }
 }
-

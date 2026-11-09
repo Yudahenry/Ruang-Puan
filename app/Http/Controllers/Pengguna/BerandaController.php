@@ -21,7 +21,7 @@ class BerandaController extends Controller
             ->first();
 
         // Section 4: Konsultasi mendatang (booking terdekat)
-        $konsultasiMendatang = Pemesanan::with(['jadwalKonsultasi.konselor.user'])
+        $konsultasiMendatang = Pemesanan::with(['jadwalKonsultasi.konselor.user', 'konsultasi'])
             ->where('user_id', $user->id)
             ->whereHas('jadwalKonsultasi', function ($query) {
                 $query->where('tanggal', '>=', now()->toDateString());
