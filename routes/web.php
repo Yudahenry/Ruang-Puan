@@ -76,6 +76,10 @@ Route::middleware(['auth'])->prefix('konsultasi')->name('konsultasi.')->group(fu
     Route::get('/', [KonsultasiController::class, 'index'])->name('index');
     Route::get('/pilih/{konselor}', [KonsultasiController::class, 'pilihJadwal'])->name('jadwal');
     Route::post('/store', [KonsultasiController::class, 'store'])->name('store');
+    
+    // Rute Baru: Fitur Pembayaran Konsultasi
+    Route::get('/{id}/tagihan', [KonsultasiController::class, 'showTagihan'])->name('tagihan');
+    Route::post('/{id}/bayar', [KonsultasiController::class, 'bayar'])->name('bayar');
 });
 
 // ==========================================

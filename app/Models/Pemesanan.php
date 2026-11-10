@@ -15,6 +15,9 @@ class Pemesanan extends Model
         'user_id',
         'jadwal_id',
         'status',
+        'total_biaya',
+        'status_pembayaran',
+        'metode_pembayaran',
     ];
 
     public function user()
@@ -22,7 +25,14 @@ class Pemesanan extends Model
         return $this->belongsTo(User::class);
     }
 
+    // Relasi utama ke JadwalKonsultasi
     public function jadwalKonsultasi()
+    {
+        return $this->belongsTo(JadwalKonsultasi::class, 'jadwal_id');
+    }
+
+    // Alias 'jadwal' agar kompatibel dengan Controller yang memanggil with('jadwal')
+    public function jadwal()
     {
         return $this->belongsTo(JadwalKonsultasi::class, 'jadwal_id');
     }
