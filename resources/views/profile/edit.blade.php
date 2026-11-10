@@ -301,7 +301,7 @@
             <p class="text-sm text-ink-600 mt-0.5">Gunakan kata sandi baru minimal 8 karakter.</p>
         </div>
 
-        <form method="POST" action="{{ route('profile.password') }}" class="space-y-5">
+                <form method="POST" action="{{ route('profile.password') }}" class="space-y-5" x-data="{ pw: '', get skor() { let s = 0; if (this.pw.length >= 8) s++; if (/[a-z]/.test(this.pw) && /[A-Z]/.test(this.pw)) s++; if (/\d/.test(this.pw)) s++; if (/[^A-Za-z0-9]/.test(this.pw)) s++; if (this.pw.length >= 12) s++; return s; } }">
             @csrf
             @method('PUT')
 
@@ -312,7 +312,15 @@
 
             <div>
                 <label for="password" class="block text-sm font-semibold text-ink-900 mb-1.5">Kata Sandi Baru</label>
-                <input id="password" type="password" name="password" required autocomplete="new-password" class="{{ $input }}">
+                               <input id="password" type="password" name="password" required autocomplete="new-password" x-model="pw" class="{{ $input }}">
+                <div class="mt-2" x-show="pw.length > 0" x-cloak>
+                    <div class="h-1.5 w-full bg-cream-200 rounded-full overflow-hidden">
+                        <div class="h-full transition-all duration-300"
+                                                          :class="skor <= 1 ? 'bg-danger-600' : (skor <= 3 ? 'bg-warning-600' : 'bg-success-600')"
+                             :style="'width:' + (skor * 20) + '%'"></div>
+                    </div>
+                    <p class="text-xs mt-1 text-ink-700" x-text="skor <= 1 ? 'Lemah' : (skor <= 3 ? 'Sedang' : 'Kuat')"></p>
+                </div>
             </div>
 
             <div>
