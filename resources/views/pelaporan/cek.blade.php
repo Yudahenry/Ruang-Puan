@@ -4,7 +4,7 @@
 <section class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
     <a href="{{ route('pelaporan.riwayat') }}"
-       class="inline-flex items-center gap-2 text-xs font-semibold text-sage-700 hover:text-sage-900 transition group">
+       class="inline-flex items-center gap-2 px-4 py-2 bg-sage-700 hover:bg-sage-800 text-white rounded-full text-xs font-semibold shadow-sm transition group">
         <span class="transform group-hover:-translate-x-1 transition">&larr;</span>
         <span>Kembali ke Riwayat Laporan</span>
     </a>
