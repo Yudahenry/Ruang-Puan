@@ -10,7 +10,6 @@
             <nav class="hidden md:flex space-x-2 text-sm">
                 <a href="{{ route('konselor.dashboard') }}" class="px-3 py-1.5 rounded-lg font-medium transition-all duration-200 active:scale-[0.98] {{ request()->routeIs('konselor.dashboard') ? 'bg-lavender-400 text-white shadow-sm' : 'hover:bg-lavender-400/60 text-cream-100' }}">Dashboard</a>
                 <a href="{{ route('profile.edit') }}" class="px-3 py-1.5 rounded-lg font-medium transition-all duration-200 active:scale-[0.98] {{ request()->routeIs('profile.edit') ? 'bg-lavender-400 text-white shadow-sm' : 'hover:bg-lavender-400/60 text-cream-100' }}">Dokumen & Profil</a>
-                                    <a href="{{ route('konselor.profil.edit') }}" class="px-3 py-1.5 rounded-lg font-medium transition-all duration-200 active:scale-[0.98] {{ request()->routeIs('konselor.profil.*') ? 'bg-lavender-400 text-white shadow-sm' : 'hover:bg-lavender-400/60 text-cream-100' }}">Profil Profesional</a>
             </nav>
         </div>
         <div class="flex items-center space-x-4">

@@ -171,8 +171,6 @@ Route::middleware(['auth', 'verified', 'role:pengguna'])->prefix('pengguna')->na
 
 // --- RUTE KONSELOR (MANAJEMEN JADWAL PRAKTIK & CHAT) ---
 Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->name('konselor.')->group(function () {
-        Route::get('/profil', [\App\Http\Controllers\Konselor\ProfilController::class, 'edit'])->name('profil.edit');
-    Route::put('/profil/{bagian}', [\App\Http\Controllers\Konselor\ProfilController::class, 'update'])->where('bagian', 'identitas|kredensial|layanan|rekening|kode-etik')->name('profil.update');
     Route::get('/dashboard', function () {
         return view('konselor.dashboard');
     })->name('dashboard');
