@@ -11,7 +11,7 @@
     };
     $isKonselor = $user->role === 'konselor';
     $input = 'w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2.5 text-ink-900 border text-sm transition';
-    $tabAwal = $errors->hasAny(['password_lama', 'password']) ? 'keamanan' : 'profil';
+        $tabAwal = $errors->hasAny(['password_lama', 'password', 'password_sesi']) ? 'keamanan' : 'profil';
 @endphp
 
 @extends($layout)
@@ -335,6 +335,40 @@
                 </button>
             </div>
         </form>
+
+        <div class="mt-10 pt-6 border-t border-cream-200">
+            <h2 class="text-xl font-bold text-berry-900 tracking-tight">Sesi Login Aktif</h2>
+            <p class="text-sm text-ink-600 mt-0.5">Perangkat yang sedang masuk ke akun Anda.</p>
+
+            <ul class="mt-4 space-y-2">
+                @forelse($sesi as $s)
+                    <li class="flex items-center justify-between p-3 rounded-lg border border-cream-200 bg-cream-50">
+                        <div>
+                            <p class="text-sm font-semibold text-ink-900">{{ $s->perangkat }}
+                                @if($s->saat_ini)
+                                    <span class="ml-2 text-xs font-semibold text-success-600">Perangkat ini</span>
+                                @endif
+                            </p>
+                            <p class="text-xs text-ink-600">IP {{ $s->ip }} · Aktif {{ $s->terakhir }}</p>
+                        </div>
+                    </li>
+                @empty
+                    <li class="text-sm text-ink-600">Tidak ada sesi aktif.</li>
+                @endforelse
+            </ul>
+
+            <form method="POST" action="{{ route('profile.sessions.destroy') }}" class="mt-5 space-y-3">
+                @csrf
+                @method('DELETE')
+                <div>
+                    <label for="password_sesi" class="block text-sm font-semibold text-ink-900 mb-1.5">Kata Sandi</label>
+                    <input id="password_sesi" type="password" name="password_sesi" required autocomplete="current-password" class="{{ $input }}">
+                </div>
+                <button type="submit" class="px-6 py-2.5 border border-danger-600 text-danger-600 hover:bg-danger-100 font-medium rounded-lg text-sm transition-all duration-200">
+                    Keluar dari Semua Perangkat Lain
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 @endsection

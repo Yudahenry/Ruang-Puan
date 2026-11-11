@@ -9,7 +9,33 @@ class ProfileController extends Controller
 {
     public function edit(Request $request)
     {
-        return view('profile.edit', ['user' => $request->user()]);
+        $user = $request->user();
+
+                   $sesi = \Illuminate\Support\Facades\DB::table('sessions')
+            ->where('user_id', $user->id)
+            ->orderByDesc('last_activity')
+            ->get()
+            ->map(function ($s) use ($request) {
+                $ua = $s->user_agent ?? '';
+                $browser = str_contains($ua, 'Edg') ? 'Edge'
+                    : (str_contains($ua, 'Chrome') ? 'Chrome'
+                    : (str_contains($ua, 'Firefox') ? 'Firefox'
+                    : (str_contains($ua, 'Safari') ? 'Safari' : 'Browser lain')));
+                $os = str_contains($ua, 'Windows') ? 'Windows'
+                    : (str_contains($ua, 'Android') ? 'Android'
+                    : ((str_contains($ua, 'iPhone') || str_contains($ua, 'iPad')) ? 'iOS'
+                    : (str_contains($ua, 'Mac') ? 'macOS'
+                    : (str_contains($ua, 'Linux') ? 'Linux' : 'perangkat lain'))));
+
+                return (object) [
+                    'perangkat' => $browser . ' di ' . $os,
+                    'ip' => $s->ip_address,
+                    'terakhir' => \Carbon\Carbon::createFromTimestamp($s->last_activity)->locale('id')->diffForHumans(),
+                    'saat_ini' => $s->id === $request->session()->getId(),
+                ];
+            });
+
+        return view('profile.edit', ['user' => $user, 'sesi' => $sesi]);
     }
 
     public function update(Request $request)
