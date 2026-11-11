@@ -60,6 +60,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profil/password', [\App\Http\Controllers\ProfilePasswordController::class, 'update'])->name('profile.password');
     Route::delete('profil/sesi', [\App\Http\Controllers\ProfileSessionController::class, 'destroyOthers'])->name('profile.sessions.destroy');
+    Route::post('profil/foto', [\App\Http\Controllers\ProfilePhotoController::class, 'update'])->name('profile.photo.update');
+Route::delete('profil/foto', [\App\Http\Controllers\ProfilePhotoController::class, 'destroy'])->name('profile.photo.destroy');
 
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');

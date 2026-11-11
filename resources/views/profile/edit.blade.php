@@ -67,7 +67,38 @@
             </ul>
         </div>
     @endif
+    <div x-show="activeTab === 'profil'" class="mb-8 pb-6 border-b border-cream-200" x-data="{ preview: null }">
+        <h2 class="text-sm font-bold text-berry-900 uppercase tracking-wider mb-4">Foto Profil</h2>
+        <div class="flex items-start gap-5">
+            @if($user->foto_profil)
+                <img x-show="!preview" src="{{ asset('storage/' . $user->foto_profil) }}" alt="Foto profil" class="w-20 h-20 rounded-full object-cover border border-cream-200">
+            @else
+                <div x-show="!preview" class="w-20 h-20 rounded-full bg-berry-100 text-berry-700 flex items-center justify-center text-2xl font-bold">
+                    {{ strtoupper(mb_substr($user->nama, 0, 1)) }}
+                </div>
+            @endif
+            <img x-show="preview" :src="preview" alt="Pratinjau foto" class="w-20 h-20 rounded-full object-cover border border-berry-500" style="display: none;">
 
+            <div class="space-y-3">
+                <form method="POST" action="{{ route('profile.photo.update') }}" enctype="multipart/form-data" class="space-y-2">
+                    @csrf
+                    <input type="file" name="foto_profil" accept="image/png,image/jpeg" required
+                           @change="const f = $event.target.files[0]; preview = f ? URL.createObjectURL(f) : null"
+                           class="block text-sm text-ink-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-berry-100 file:text-berry-700 file:font-semibold">
+                    <p class="text-xs text-ink-600">JPG atau PNG, maksimal 2 MB.</p>
+                    <button type="submit" class="px-4 py-2 bg-berry-700 hover:bg-berry-900 text-white font-medium rounded-lg text-sm transition-all duration-200 active:scale-[0.98]">Simpan Foto</button>
+                </form>
+
+                @if($user->foto_profil)
+                    <form method="POST" action="{{ route('profile.photo.destroy') }}">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-sm font-semibold text-danger-600 hover:underline">Hapus Foto</button>
+                    </form>
+                @endif
+            </div>
+        </div>
+    </div>
     <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" @submit="loading = true" class="space-y-6">
         @csrf
         @method('PATCH')
