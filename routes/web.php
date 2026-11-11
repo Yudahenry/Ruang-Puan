@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Pengguna\KonsultasiController;
 use App\Http\Controllers\Konselor\JadwalKonsultasiController;
 use App\Http\Controllers\ChatKonsultasiController;
+use App\Http\Controllers\Konselor\BerandaKonselorController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -162,24 +163,40 @@ Route::middleware(['auth', 'verified', 'role:pengguna'])->prefix('pengguna')->na
     )->name('chat.store');
 });
 
-// --- RUTE KONSELOR (MANAJEMEN JADWAL PRAKTIK & CHAT) ---
+// --- RUTE KONSELOR (MANAJEMEN JADWAL PRAKTIK, BERANDA & CHAT) ---
 Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->name('konselor.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('konselor.dashboard');
-    })->name('dashboard');
-
+    Route::get('/dashboard', [BerandaKonselorController::class, 'index'])->name('dashboard');
     Route::get('/jadwal', [JadwalKonsultasiController::class, 'index'])->name('jadwal');
     Route::post('/jadwal', [JadwalKonsultasiController::class, 'store'])->name('jadwal.store');
     Route::delete('/jadwal/{id}', [JadwalKonsultasiController::class, 'destroy'])->name('jadwal.destroy');
 
+    // Booking (aksi dari dashboard)
+    Route::post('/booking/{id}/konfirmasi', [BerandaKonselorController::class, 'konfirmasiBooking'])->name('booking.konfirmasi');
+    Route::post('/booking/{id}/tolak', [BerandaKonselorController::class, 'tolakBooking'])->name('booking.tolak');
+
     // Chat Konselor
+    // PENTING: '/chat/kirim' harus didaftarkan SEBELUM '/chat/{id}', dan {id}
+    // dibatasi angka, supaya kata "kirim" tidak tertangkap sebagai {id}.
+    Route::post('/chat/kirim', [BerandaKonselorController::class, 'kirimPesan'])->name('chat.kirim');
+
     Route::get('/chat/{id}',
         [\App\Http\Controllers\Konselor\ChatController::class, 'show']
-    )->name('chat.show');
+    )->whereNumber('id')->name('chat.show');
 
     Route::post('/chat/{id}',
         [\App\Http\Controllers\Konselor\ChatController::class, 'store']
-    )->name('chat.store');
+    )->whereNumber('id')->name('chat.store');
+
+    // Navigasi pendukung konselor
+    Route::get('/booking', function () {
+        return redirect()->route('konselor.dashboard', ['tab' => 'booking']);
+    })->name('booking');
+    Route::get('/chat', function () {
+        return redirect()->route('konselor.dashboard', ['modal' => 'chat']);
+    })->name('chat');
+    Route::get('/riwayat', function () {
+        return redirect()->route('konselor.dashboard', ['tab' => 'riwayat']);
+    })->name('riwayat');
 });
 
 Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

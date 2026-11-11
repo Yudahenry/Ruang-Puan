@@ -6,95 +6,55 @@
 
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-fraunces: 'Fraunces', Lora, Georgia, serif;
+    --font-lora: 'Lora', Georgia, serif;
+    --font-fraunces: 'Lora', Georgia, serif;
 
-    --color-sage-900: #29382C;
-    --color-sage-700: #304936;
-    --color-sage-600: #526739;
-    --color-sage-500: #70796C;
-    --color-sage-200: #D9E2C6;
-    --color-sage-150: #E0E7D8;
-    --color-sage-100: #E9EEDC;
+    --color-plum-900: #3E293F;
+    --color-plum-700: #643B62;
+    --color-plum-100: #EEE7F2;
 
-    --color-cream-50:  #FCFDF5;
-    --color-cream-100: #F7EFE6;
-    --color-cream-200: #ECE2D0;
-    --color-white:     #FFFFFF;
-
-    --color-berry-900: #4A1E30;
-    --color-berry-700: #6D2E46;
-    --color-berry-600: #7C3552;
-    --color-berry-500: #8A4061;
-    --color-berry-300: #C98FA8;
-    --color-berry-100: #F1DCE4;
-
-    --color-rose-600: #B5567A;
-    --color-rose-400: #D98CAA;
-    --color-rose-200: #F3D4E0;
-
-    --color-lavender-600: #7A5C9E;
-    --color-lavender-400: #A98FC4;
-    --color-lavender-200: #E6DCF2;
-
-    --color-ink-900:   #2E2029;
-    --color-ink-600:   #6B5C62;
+    --color-ink-600: #746B77;
+    --color-line: #DCD5DD;
+    --color-surface-50: #FCFAF8;
+    --color-white: #FFFFFF;
 
     --color-success-600: #2E7D5B;
     --color-success-100: #DCEFE4;
     --color-warning-600: #B9862A;
     --color-warning-100: #F6EBD4;
-    --color-danger-600:  #B3261E;
-    --color-danger-100:  #F6DEDC;
-    --color-info-600:    #2D6CB5;
-    --color-info-100:    #DCE7F5;
-
-    --color-role-pengguna: #2D6CB5;
-    --color-role-konselor: #7A5C9E;
-    --color-role-admin:    #B5567A;
+    --color-danger-600: #B3261E;
+    --color-danger-100: #F6DEDC;
+    --color-info-600: #2D6CB5;
+    --color-info-100: #DCE7F5;
 }
 
 :root {
-    --font-fraunces: 'Fraunces', Lora, Georgia, serif;
-    --color-sage-900: #29382C;
-    --color-sage-700: #304936;
-    --color-sage-600: #526739;
-    --color-sage-500: #70796C;
-    --color-sage-200: #D9E2C6;
-    --color-sage-150: #E0E7D8;
-    --color-sage-100: #E9EEDC;
-    --color-cream-50:  #FCFDF5;
-    --color-cream-100: #F7EFE6;
-    --color-cream-200: #ECE2D0;
-    --color-white:     #FFFFFF;
-    --color-berry-900: #4A1E30;
-    --color-berry-700: #6D2E46;
-    --color-berry-600: #7C3552;
-    --color-berry-500: #8A4061;
-    --color-berry-300: #C98FA8;
-    --color-berry-100: #F1DCE4;
-    --color-rose-600: #B5567A;
-    --color-rose-400: #D98CAA;
-    --color-rose-200: #F3D4E0;
-    --color-lavender-600: #7A5C9E;
-    --color-lavender-400: #A98FC4;
-    --color-lavender-200: #E6DCF2;
-    --color-ink-900:   #2E2029;
-    --color-ink-600:   #6B5C62;
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-lora: 'Lora', Georgia, serif;
+    --font-fraunces: 'Lora', Georgia, serif;
+
+    --color-plum-900: #3E293F;
+    --color-plum-700: #643B62;
+    --color-plum-100: #EEE7F2;
+
+    --color-ink-600: #746B77;
+    --color-line: #DCD5DD;
+    --color-surface-50: #FCFAF8;
+    --color-white: #FFFFFF;
+
     --color-success-600: #2E7D5B;
     --color-success-100: #DCEFE4;
     --color-warning-600: #B9862A;
     --color-warning-100: #F6EBD4;
-    --color-danger-600:  #B3261E;
-    --color-danger-100:  #F6DEDC;
-    --color-info-600:    #2D6CB5;
-    --color-info-100:    #DCE7F5;
-    --color-role-pengguna: #2D6CB5;
-    --color-role-konselor: #7A5C9E;
-    --color-role-admin:    #B5567A;
+    --color-danger-600: #B3261E;
+    --color-danger-100: #F6DEDC;
+    --color-info-600: #2D6CB5;
+    --color-info-100: #DCE7F5;
 }
 
 body {
-    background-color: var(--color-cream-50);
-    color: var(--color-ink-900);
+    background-color: var(--color-surface-50);
+    color: var(--color-plum-900);
     font-family: var(--font-sans);
 }
+
