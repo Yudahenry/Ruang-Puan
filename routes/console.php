@@ -41,3 +41,29 @@ Artisan::command('make:admin {email}', function (string $email) {
     );
     $this->info("User {$email} is now an Admin!");
 });
+
+Artisan::command('make:konselor {email}', function (string $email) {
+    $user = \App\Models\User::where('email', $email)->first();
+    if (!$user) {
+        $this->error("User with email {$email} not found!");
+        return;
+    }
+    $user->update([
+        'role' => 'konselor',
+        'email_verified_at' => now(),
+    ]);
+    
+    // Otomatis buat data profil konselor dan set status terverifikasi
+    \App\Models\Konselor::firstOrCreate(
+        ['user_id' => $user->id],
+        [
+            'no_str' => 'STR-' . rand(100000, 999999),
+            'no_sipp' => 'SIPP-' . date('Y') . '-' . rand(100, 999),
+            'bidang_keahlian' => 'Pendampingan Psikologis & Trauma KBG',
+            'tarif' => 50000,
+            'status_verifikasi' => 'disetujui'
+        ]
+    );
+    
+    $this->info("User {$email} is now a verified Konselor!");
+});
