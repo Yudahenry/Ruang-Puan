@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profil/password', [\App\Http\Controllers\ProfilePasswordController::class, 'update'])->name('profile.password');
     Route::delete('profil/sesi', [\App\Http\Controllers\ProfileSessionController::class, 'destroyOthers'])->name('profile.sessions.destroy');
+        Route::delete('/profil/akun', [\App\Http\Controllers\ProfileAccountController::class, 'deactivate'])->name('profile.deactivate');
     Route::post('profil/foto', [\App\Http\Controllers\ProfilePhotoController::class, 'update'])->name('profile.photo.update');
     Route::delete('profil/foto', [\App\Http\Controllers\ProfilePhotoController::class, 'destroy'])->name('profile.photo.destroy');
 
@@ -82,6 +83,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->prefix('konsultasi')->name('konsultasi.')->group(function () {
     Route::get('/', [KonsultasiController::class, 'index'])->name('index');
     Route::get('/pilih/{konselor}', [KonsultasiController::class, 'pilihJadwal'])->name('jadwal');
+    Route::get('/konselor/{konselor}', [\App\Http\Controllers\KonselorPublikController::class, 'show'])->name('konselor.profil');
     Route::post('/store', [KonsultasiController::class, 'store'])->name('store');
 });
 

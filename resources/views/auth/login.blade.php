@@ -106,6 +106,11 @@
                 Masuk untuk mengakses dukungan dan informasi yang kamu butuhkan.
             </p>
 
+            @if(session('status'))
+                <div class="mb-6 bg-[#ece4ef] border border-[#d9cfde] text-[#6b3b63] p-3.5 rounded-lg text-sm">
+                    {{ session('status') }}
+                </div>
+            @endif
             @if($errors->any())
                 <div class="mb-6 bg-[#F6DEDC] border border-[#B3261E]/30 text-[#B3261E] p-4 rounded-2xl text-xs shadow-sm">
                     <ul class="list-disc list-inside space-y-1">

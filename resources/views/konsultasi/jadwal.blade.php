@@ -12,7 +12,7 @@
                 </div>
                 <div>
                     <span class="text-[10px] uppercase tracking-widest font-bold text-[#643B62] bg-[#EEE7F2] px-2.5 py-0.5 rounded-full">
-                        {{ $konselor->spesialisasi ?? 'Psikolog Klinis' }}
+                        {{ is_array($konselor->spesialisasi) ? implode(', ', $konselor->spesialisasi) : ($konselor->spesialisasi ?? 'Psikolog Klinis') }}
                     </span>
                     <h1 class="text-2xl sm:text-3xl font-serif font-bold text-[#3E293F] tracking-tight mt-1.5">
                         {{ $konselor->user->nama ?? 'Konselor Profesional' }}
@@ -41,7 +41,7 @@
         @else
             <form action="{{ route('konsultasi.store') }}" method="POST" x-data="{ selectedSlot: null }">
                 @csrf
-                
+
                 <div class="space-y-6">
                     <div>
                         <div class="flex items-center justify-between mb-4">

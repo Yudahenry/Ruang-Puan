@@ -11,7 +11,7 @@
     };
     $isKonselor = $user->role === 'konselor';
     $input = 'w-full rounded-2xl border-[#DCD5DD] bg-[#FCFAF8] focus:border-[#643B62] focus:ring-1 focus:ring-[#643B62] focus:outline-none px-4 py-3 text-[#3E293F] border text-xs sm:text-sm shadow-inner transition';
-    $tabAwal = $errors->hasAny(['password_lama', 'password', 'password_sesi']) ? 'keamanan' : 'profil';
+    $tabAwal = $errors->hasAny(['password_lama', 'password', 'password_sesi', 'password_nonaktif']) ? 'keamanan' : 'profil';
 @endphp
 
 @extends($layout)
@@ -402,6 +402,29 @@
                 </button>
             </form>
         </div>
+
+        @if($user->role !== 'admin')
+            <div class="mt-10 pt-6 border-t border-[#DCD5DD]">
+                <h2 class="text-xl font-serif font-bold text-rose-600 tracking-tight">Nonaktifkan Akun</h2>
+                <p class="text-xs sm:text-sm text-[#746B77] mt-0.5">
+                    Akun Anda akan dinonaktifkan sementara dan Anda otomatis keluar dari semua perangkat.
+                    Untuk mengaktifkannya kembali, hubungi admin.
+                </p>
+
+                <form method="POST" action="{{ route('profile.deactivate') }}" class="mt-5 space-y-3"
+                      onsubmit="return confirm('Yakin ingin menonaktifkan akun? Anda akan keluar dari semua perangkat.');">
+                    @csrf
+                    @method('DELETE')
+                    <div>
+                        <label for="password_nonaktif" class="block text-xs font-semibold text-[#3E293F] mb-2">Kata Sandi</label>
+                        <input id="password_nonaktif" type="password" name="password_nonaktif" required autocomplete="current-password" class="{{ $input }}">
+                    </div>
+                    <button type="submit" class="px-6 py-2.5 border border-rose-300 text-rose-700 hover:bg-rose-50 font-semibold rounded-2xl text-xs sm:text-sm transition-all duration-200">
+                        Nonaktifkan Akun
+                    </button>
+                </form>
+            </div>
+        @endif
     </div>
 </div>
 @endsection
