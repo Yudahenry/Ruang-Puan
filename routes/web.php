@@ -60,6 +60,9 @@ Route::middleware('auth')->group(function () {
     Route::get('profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profil/password', [\App\Http\Controllers\ProfilePasswordController::class, 'update'])->name('profile.password');
+    Route::delete('profil/sesi', [\App\Http\Controllers\ProfileSessionController::class, 'destroyOthers'])->name('profile.sessions.destroy');
+    Route::post('profil/foto', [\App\Http\Controllers\ProfilePhotoController::class, 'update'])->name('profile.photo.update');
+    Route::delete('profil/foto', [\App\Http\Controllers\ProfilePhotoController::class, 'destroy'])->name('profile.photo.destroy');
 
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
@@ -102,6 +105,8 @@ Route::middleware(['auth', 'role:pengguna'])->prefix('pelaporan')->name('pelapor
     Route::get('/buat', [LaporanController::class, 'create'])->name('buat');
     Route::post('/', [LaporanController::class, 'store'])->name('store');
     Route::get('/riwayat', [LaporanController::class, 'index'])->name('riwayat');
+    Route::get('/cek', [LaporanController::class, 'cek'])->name('cek');
+    Route::get('/bukti/{id}', [LaporanController::class, 'unduhBukti'])->name('bukti');
 });
 
 Route::middleware(['auth'])->get('/pelaporan/lacak/{kode}', [LaporanController::class, 'lacak'])->name('pelaporan.lacak');
@@ -165,7 +170,11 @@ Route::middleware(['auth', 'verified', 'role:pengguna'])->prefix('pengguna')->na
 
 // --- RUTE KONSELOR (MANAJEMEN JADWAL PRAKTIK, BERANDA & CHAT) ---
 Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->name('konselor.')->group(function () {
+    Route::get('/profil', [\App\Http\Controllers\Konselor\ProfilController::class, 'edit'])->name('profil.edit');
+    Route::put('/profil/{bagian}', [\App\Http\Controllers\Konselor\ProfilController::class, 'update'])->where('bagian', 'identitas|kredensial|layanan|rekening|kode-etik')->name('profil.update');
+    
     Route::get('/dashboard', [BerandaKonselorController::class, 'index'])->name('dashboard');
+
     Route::get('/jadwal', [JadwalKonsultasiController::class, 'index'])->name('jadwal');
     Route::post('/jadwal', [JadwalKonsultasiController::class, 'store'])->name('jadwal.store');
     Route::delete('/jadwal/{id}', [JadwalKonsultasiController::class, 'destroy'])->name('jadwal.destroy');
@@ -175,8 +184,6 @@ Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->na
     Route::post('/booking/{id}/tolak', [BerandaKonselorController::class, 'tolakBooking'])->name('booking.tolak');
 
     // Chat Konselor
-    // PENTING: '/chat/kirim' harus didaftarkan SEBELUM '/chat/{id}', dan {id}
-    // dibatasi angka, supaya kata "kirim" tidak tertangkap sebagai {id}.
     Route::post('/chat/kirim', [BerandaKonselorController::class, 'kirimPesan'])->name('chat.kirim');
 
     Route::get('/chat/{id}',

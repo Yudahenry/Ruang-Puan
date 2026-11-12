@@ -11,7 +11,7 @@
     };
     $isKonselor = $user->role === 'konselor';
     $input = 'w-full rounded-2xl border-[#DCD5DD] bg-[#FCFAF8] focus:border-[#643B62] focus:ring-1 focus:ring-[#643B62] focus:outline-none px-4 py-3 text-[#3E293F] border text-xs sm:text-sm shadow-inner transition';
-    $tabAwal = $errors->hasAny(['password_lama', 'password']) ? 'keamanan' : 'profil';
+    $tabAwal = $errors->hasAny(['password_lama', 'password', 'password_sesi']) ? 'keamanan' : 'profil';
 @endphp
 
 @extends($layout)
@@ -67,6 +67,40 @@
             </ul>
         </div>
     @endif
+
+    <!-- Foto Profil Section -->
+    <div x-show="activeTab === 'profil'" class="mb-8 pb-6 border-b border-[#DCD5DD]" x-data="{ preview: null }">
+        <h2 class="text-xs font-bold text-[#643B62] uppercase tracking-wider mb-4">Foto Profil</h2>
+        <div class="flex items-start gap-5">
+            @if($user->foto_profil)
+                <img x-show="!preview" src="{{ asset('storage/' . $user->foto_profil) }}" alt="Foto profil" class="w-20 h-20 rounded-full object-cover border border-[#DCD5DD]">
+            @else
+                <div x-show="!preview" class="w-20 h-20 rounded-full bg-[#EEE7F2] text-[#643B62] flex items-center justify-center text-2xl font-bold shadow-inner">
+                    {{ strtoupper(mb_substr($user->nama, 0, 1)) }}
+                </div>
+            @endif
+            <img x-show="preview" :src="preview" alt="Pratinjau foto" class="w-20 h-20 rounded-full object-cover border border-[#643B62]" style="display: none;">
+
+            <div class="space-y-3">
+                <form method="POST" action="{{ route('profile.photo.update') }}" enctype="multipart/form-data" class="space-y-2">
+                    @csrf
+                    <input type="file" name="foto_profil" accept="image/png,image/jpeg" required
+                           @change="const f = $event.target.files[0]; preview = f ? URL.createObjectURL(f) : null"
+                           class="block text-xs text-[#746B77] file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#EEE7F2] file:text-[#643B62] file:font-semibold file:cursor-pointer hover:file:bg-[#643B62] hover:file:text-white transition">
+                    <p class="text-[11px] text-[#746B77]">JPG atau PNG, maksimal 2 MB.</p>
+                    <button type="submit" class="px-4 py-2 bg-[#643B62] hover:bg-[#3E293F] text-white font-semibold rounded-xl text-xs transition-all duration-200 active:scale-[0.98]">Simpan Foto</button>
+                </form>
+
+                @if($user->foto_profil)
+                    <form method="POST" action="{{ route('profile.photo.destroy') }}">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-xs font-semibold text-rose-600 hover:underline">Hapus Foto</button>
+                    </form>
+                @endif
+            </div>
+        </div>
+    </div>
 
     <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" @submit="loading = true" class="space-y-6">
         @csrf
@@ -300,7 +334,7 @@
             <p class="text-xs sm:text-sm text-[#746B77] mt-1">Gunakan kata sandi baru minimal 8 karakter.</p>
         </div>
 
-        <form method="POST" action="{{ route('profile.password') }}" class="space-y-6">
+        <form method="POST" action="{{ route('profile.password') }}" class="space-y-6" x-data="{ pw: '', get skor() { let s = 0; if (this.pw.length >= 8) s++; if (/[a-z]/.test(this.pw) && /[A-Z]/.test(this.pw)) s++; if (/\d/.test(this.pw)) s++; if (/[^A-Za-z0-9]/.test(this.pw)) s++; if (this.pw.length >= 12) s++; return s; } }">
             @csrf
             @method('PUT')
 
@@ -311,7 +345,15 @@
 
             <div>
                 <label for="password" class="block text-xs font-semibold text-[#3E293F] mb-2">Kata Sandi Baru</label>
-                <input id="password" type="password" name="password" required autocomplete="new-password" class="{{ $input }}">
+                <input id="password" type="password" name="password" required autocomplete="new-password" x-model="pw" class="{{ $input }}">
+                <div class="mt-2" x-show="pw.length > 0" x-cloak>
+                    <div class="h-1.5 w-full bg-[#DCD5DD] rounded-full overflow-hidden">
+                        <div class="h-full transition-all duration-300"
+                             :class="skor <= 1 ? 'bg-rose-600' : (skor <= 3 ? 'bg-amber-500' : 'bg-emerald-600')"
+                             :style="'width:' + (skor * 20) + '%'"></div>
+                    </div>
+                    <p class="text-[11px] mt-1 text-[#746B77]" x-text="skor <= 1 ? 'Lemah' : (skor <= 3 ? 'Sedang' : 'Kuat')"></p>
+                </div>
             </div>
 
             <div>
@@ -326,6 +368,40 @@
                 </button>
             </div>
         </form>
+
+        <div class="mt-10 pt-6 border-t border-[#DCD5DD]">
+            <h2 class="text-xl font-serif font-bold text-[#3E293F] tracking-tight">Sesi Login Aktif</h2>
+            <p class="text-xs sm:text-sm text-[#746B77] mt-1">Perangkat yang sedang masuk ke akun Anda.</p>
+
+            <ul class="mt-4 space-y-3">
+                @forelse($sesi as $s)
+                    <li class="flex items-center justify-between p-4 rounded-2xl border border-[#DCD5DD] bg-[#FCFAF8]">
+                        <div>
+                            <p class="text-xs sm:text-sm font-semibold text-[#3E293F]">{{ $s->perangkat }}
+                                @if($s->saat_ini)
+                                    <span class="ml-2 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">Perangkat ini</span>
+                                @endif
+                            </p>
+                            <p class="text-[11px] text-[#746B77] mt-0.5">IP {{ $s->ip }} · Aktif {{ $s->terakhir }}</p>
+                        </div>
+                    </li>
+                @empty
+                    <li class="text-xs text-[#746B77]">Tidak ada sesi aktif.</li>
+                @endforelse
+            </ul>
+
+            <form method="POST" action="{{ route('profile.sessions.destroy') }}" class="mt-6 space-y-4">
+                @csrf
+                @method('DELETE')
+                <div>
+                    <label for="password_sesi" class="block text-xs font-semibold text-[#3E293F] mb-2">Kata Sandi</label>
+                    <input id="password_sesi" type="password" name="password_sesi" required autocomplete="current-password" class="{{ $input }}">
+                </div>
+                <button type="submit" class="px-6 py-3 border border-rose-300 text-rose-700 hover:bg-rose-50 font-semibold rounded-2xl text-xs sm:text-sm transition-all duration-200">
+                    Keluar dari Semua Perangkat Lain
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 @endsection
