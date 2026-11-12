@@ -11,7 +11,7 @@
     };
     $isKonselor = $user->role === 'konselor';
     $input = 'w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3.5 py-2.5 text-ink-900 border text-sm transition';
-        $tabAwal = $errors->hasAny(['password_lama', 'password', 'password_sesi']) ? 'keamanan' : 'profil';
+           $tabAwal = $errors->hasAny(['password_lama', 'password', 'password_sesi', 'password_nonaktif']) ? 'keamanan' : 'profil';
 @endphp
 
 @extends($layout)
@@ -400,6 +400,29 @@
                 </button>
             </form>
         </div>
+
+        @if($user->role !== 'admin')
+            <div class="mt-10 pt-6 border-t border-cream-200">
+                <h2 class="text-xl font-bold text-danger-600 tracking-tight">Nonaktifkan Akun</h2>
+                <p class="text-sm text-ink-600 mt-0.5">
+                    Akun Anda akan dinonaktifkan sementara dan Anda otomatis keluar dari semua perangkat.
+                    Untuk mengaktifkannya kembali, hubungi admin.
+                </p>
+
+                <form method="POST" action="{{ route('profile.deactivate') }}" class="mt-5 space-y-3"
+                      onsubmit="return confirm('Yakin ingin menonaktifkan akun? Anda akan keluar dari semua perangkat.');">
+                    @csrf
+                    @method('DELETE')
+                    <div>
+                        <label for="password_nonaktif" class="block text-sm font-semibold text-ink-900 mb-1.5">Kata Sandi</label>
+                        <input id="password_nonaktif" type="password" name="password_nonaktif" required autocomplete="current-password" class="{{ $input }}">
+                    </div>
+                    <button type="submit" class="px-6 py-2.5 border border-danger-600 text-danger-600 hover:bg-danger-100 font-medium rounded-lg text-sm transition-all duration-200">
+                        Nonaktifkan Akun
+                    </button>
+                </form>
+            </div>
+        @endif
     </div>
 </div>
 @endsection

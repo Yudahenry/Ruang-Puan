@@ -25,12 +25,12 @@
                         <div class="w-12 h-12 rounded-full bg-berry-100 text-berry-700 flex items-center justify-center font-bold text-lg mb-4">
                             {{ substr($konselor->user->nama ?? 'K', 0, 1) }}
                         </div>
-                        <h3 class="font-bold text-berry-900 text-lg mb-1">{{ $konselor->user->nama ?? 'Konselor Profesional' }}</h3>
-                        <p class="text-xs text-rose-600 font-semibold mb-3">{{ $konselor->spesialisasi ?? 'Psikolog Klinis & Pendampingan' }}</p>
+                                                <h3 class="font-bold text-berry-900 text-lg mb-1"><a href="{{ route('konsultasi.konselor.profil', $konselor->id) }}" class="hover:text-berry-700 hover:underline">{{ $konselor->user->nama ?? 'Konselor Profesional' }}</a></h3>
+                                                <p class="text-xs text-rose-600 font-semibold mb-3">{{ !empty($konselor->spesialisasi) ? implode(', ', $konselor->spesialisasi) : 'Psikolog Klinis & Pendampingan' }}</p>
                         <p class="text-xs text-ink-600 leading-relaxed mb-6">{{ Str::limit($konselor->bio ?? 'Pendampingan profesional yang aman, rahasia, dan bebas stigma.', 90) }}</p>
                     </div>
                     <div>
-                        <a href="{{ route('konsultasi.jadwal', $konselor->id) }}" 
+                        <a href="{{ route('konsultasi.jadwal', $konselor->id) }}"
                            class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-berry-700 hover:bg-berry-900 text-white rounded-lg text-xs font-semibold shadow-sm transition-all duration-200 active:scale-[0.98]">
                             Lihat Jadwal &rarr;
                         </a>
