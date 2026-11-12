@@ -81,6 +81,7 @@ Route::delete('profil/foto', [\App\Http\Controllers\ProfilePhotoController::clas
 Route::middleware(['auth'])->prefix('konsultasi')->name('konsultasi.')->group(function () {
     Route::get('/', [KonsultasiController::class, 'index'])->name('index');
     Route::get('/pilih/{konselor}', [KonsultasiController::class, 'pilihJadwal'])->name('jadwal');
+    Route::get('/konselor/{konselor}', [\App\Http\Controllers\KonselorPublikController::class, 'show'])->name('konselor.profil');
     Route::post('/store', [KonsultasiController::class, 'store'])->name('store');
 });
 

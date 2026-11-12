@@ -11,8 +11,8 @@
             <div class="flex-1">
                 <h1 class="text-2xl font-bold text-berry-900 tracking-tight">Pilih Jadwal Konsultasi</h1>
                 <p class="text-sm text-ink-600 mt-1">
-                    Bersama Konselor: <span class="font-semibold text-berry-700">{{ $konselor->user->nama ?? 'Konselor Profesional' }}</span> 
-                    <span class="text-xs text-rose-600 ml-1">({{ $konselor->spesialisasi ?? 'Psikolog Klinis' }})</span>
+                    Bersama Konselor: <span class="font-semibold text-berry-700">{{ $konselor->user->nama ?? 'Konselor Profesional' }}</span>
+                                    <span class="text-xs text-rose-600 ml-1">({{ !empty($konselor->spesialisasi) ? implode(', ', $konselor->spesialisasi) : 'Psikolog Klinis' }})</span>
                 </p>
             </div>
             <div>
@@ -31,11 +31,11 @@
         @else
             <form action="{{ route('konsultasi.store') }}" method="POST">
                 @csrf
-                
+
                 <div class="space-y-6">
                     <div>
                         <label class="block text-xs font-bold text-berry-900 uppercase tracking-wider mb-3">Pilih Slot Jadwal Tersedia</label>
-                        
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             @foreach($konselor->jadwalKonsultasis as $jadwal)
                                 <label class="relative flex flex-col p-4 bg-cream-50/70 border border-cream-300 rounded-xl cursor-pointer hover:border-berry-700 transition-all group">
