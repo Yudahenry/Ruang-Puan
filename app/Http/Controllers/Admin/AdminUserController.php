@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class AdminUserController extends Controller
 {
@@ -20,8 +21,8 @@ class AdminUserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // Akun admin tidak boleh dinonaktifkan dari halaman ini
-        abort_if($user->role === 'admin', 403);
+         // Hanya admin yang boleh, dan akun admin tidak boleh dinonaktifkan (lihat UserPolicy)
+        Gate::authorize('toggleStatus', $user);
 
         $statusBaru = $user->status === 'aktif' ? 'nonaktif' : 'aktif';
         $user->forceFill(['status' => $statusBaru])->save();
