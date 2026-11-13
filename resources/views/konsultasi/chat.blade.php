@@ -4,37 +4,37 @@
 <section class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
 
     <a href="{{ route('pengguna.riwayat-konsultasi') }}"
-       class="inline-flex items-center gap-2 text-xs font-semibold text-sage-700 hover:text-sage-900 transition group">
+       class="inline-flex items-center gap-2 text-xs font-semibold text-[#643B62] hover:text-[#3E293F] transition group">
         <span class="transform group-hover:-translate-x-1 transition">&larr;</span>
         <span>Kembali ke Riwayat Konsultasi</span>
     </a>
 
-    <div class="bg-white border border-sage-200 rounded-2xl shadow-sm overflow-hidden">
+    <div class="bg-white border border-[#DCD5DD] rounded-3xl shadow-sm overflow-hidden">
 
         {{-- Header --}}
-        <div class="px-5 py-4 border-b border-sage-200 bg-sage-100/60 flex items-center justify-between gap-3">
+        <div class="px-6 py-5 border-b border-[#DCD5DD] bg-[#EEE7F2]/60 flex items-center justify-between gap-3">
             <div>
-                <h1 class="text-lg font-bold font-fraunces text-sage-900">{{ $namaLawan }}</h1>
-                <p class="text-xs text-sage-600">
+                <h1 class="text-lg font-serif font-bold text-[#3E293F]">{{ $namaLawan }}</h1>
+                <p class="text-xs text-[#746B77] mt-0.5">
                     {{ $konsultasi->waktuMulai()?->translatedFormat('l, d F Y · H:i') }}
                     &ndash; {{ $konsultasi->waktuSelesai()?->format('H:i') }}
                 </p>
             </div>
             <span id="badge-sesi"
-                  class="inline-flex px-3 py-1 rounded-full border text-[11px] font-semibold
-                  {{ $aktif ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-sage-200 text-sage-900 border-sage-200' }}">
+                  class="inline-flex px-3.5 py-1 rounded-full border text-[11px] font-semibold
+                  {{ $aktif ? 'bg-green-100 text-green-700 border-green-200' : 'bg-[#EEE7F2] text-[#3E293F] border-[#DCD5DD]' }}">
                 {{ $aktif ? 'Sesi berlangsung' : ($berakhir ? 'Sesi selesai' : 'Belum dimulai') }}
             </span>
         </div>
 
         {{-- Daftar pesan --}}
-        <div id="kotak-pesan" class="h-[420px] overflow-y-auto px-5 py-4 space-y-3 bg-white">
-            <p id="kosong" class="text-center text-xs text-sage-600 font-light py-10">Belum ada pesan.</p>
+        <div id="kotak-pesan" class="h-[420px] overflow-y-auto px-6 py-5 space-y-4 bg-white">
+            <p id="kosong" class="text-center text-xs text-[#746B77] font-light py-10">Belum ada pesan.</p>
         </div>
 
         {{-- Form kirim --}}
-        <div class="border-t border-sage-200 p-4 bg-sage-100/40">
-            <p id="info-nonaktif" class="text-xs text-sage-600 text-center mb-3 {{ $aktif ? 'hidden' : '' }}">
+        <div class="border-t border-[#DCD5DD] p-4 sm:p-5 bg-[#FCFAF8]">
+            <p id="info-nonaktif" class="text-xs text-[#746B77] text-center mb-3 {{ $aktif ? 'hidden' : '' }}">
                 @if ($berakhir)
                     Sesi telah berakhir. Percakapan hanya dapat dibaca.
                 @else
@@ -46,16 +46,16 @@
                 <textarea id="isi" rows="1" maxlength="1000"
                           placeholder="Tulis pesan..."
                           {{ $aktif ? '' : 'disabled' }}
-                          class="flex-1 resize-none bg-white border border-sage-200 rounded-xl px-3 py-2.5 text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-sage-200 disabled:bg-sage-100 disabled:cursor-not-allowed"></textarea>
+                          class="flex-1 resize-none bg-white border border-[#DCD5DD] rounded-2xl px-4 py-3 text-xs sm:text-sm text-[#3E293F] placeholder-[#746B77]/50 focus:outline-none focus:ring-1 focus:ring-[#643B62] focus:border-[#643B62] disabled:bg-[#EEE7F2]/50 disabled:cursor-not-allowed shadow-inner transition"></textarea>
                 <button id="tombol-kirim" type="submit" {{ $aktif ? '' : 'disabled' }}
-                        class="px-5 py-2.5 bg-sage-700 hover:bg-sage-800 text-white rounded-xl text-xs font-semibold shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="px-6 py-3 bg-[#643B62] hover:bg-[#3E293F] text-white rounded-2xl text-xs font-semibold shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]">
                     Kirim
                 </button>
             </form>
         </div>
     </div>
 
-    <p class="text-[11px] text-sage-600 font-light text-center">
+    <p class="text-[11px] text-[#746B77] font-light text-center">
         Konsultasi di Ruang Puan adalah pendampingan awal, bukan pengganti layanan medis profesional.
     </p>
 </section>
@@ -66,7 +66,7 @@
     const urlKirim = @json(route('konsultasi.chat.kirim', $konsultasi->id));
     const csrf     = @json(csrf_token());
 
-    const kotak   = document.getElementById('kotak-pesan');
+    const kotak  = document.getElementById('kotak-pesan');
     const kosong  = document.getElementById('kosong');
     const form    = document.getElementById('form-chat');
     const isi     = document.getElementById('isi');
@@ -84,19 +84,19 @@
         baris.className = 'flex ' + (p.mine ? 'justify-end' : 'justify-start');
 
         const gelembung = document.createElement('div');
-        gelembung.className = 'max-w-[75%] rounded-2xl px-4 py-2.5 ' +
-            (p.mine ? 'bg-sage-700 text-white rounded-br-md' : 'bg-sage-100 text-sage-900 rounded-bl-md');
+        gelembung.className = 'max-w-[75%] rounded-2xl px-4 py-3 shadow-2xs ' +
+            (p.mine ? 'bg-[#643B62] text-white rounded-br-xs' : 'bg-[#EEE7F2] text-[#3E293F] rounded-bl-xs');
 
         const nama = document.createElement('p');
-        nama.className = 'text-[10px] font-semibold mb-0.5 ' + (p.mine ? 'text-white/70' : 'text-sage-600');
+        nama.className = 'text-[10px] font-semibold mb-1 ' + (p.mine ? 'text-white/80' : 'text-[#643B62]');
         nama.textContent = p.nama;
 
         const teks = document.createElement('p');
-        teks.className = 'text-sm whitespace-pre-wrap break-words';
+        teks.className = 'text-xs sm:text-sm whitespace-pre-wrap break-words leading-relaxed';
         teks.textContent = p.isi; // textContent: aman dari XSS
 
         const waktu = document.createElement('p');
-        waktu.className = 'text-[10px] mt-1 text-right ' + (p.mine ? 'text-white/70' : 'text-sage-600');
+        waktu.className = 'text-[10px] mt-1.5 text-right ' + (p.mine ? 'text-white/70' : 'text-[#746B77]');
         waktu.textContent = p.waktu;
 
         gelembung.append(nama, teks, waktu);
@@ -112,10 +112,10 @@
         if (!nilai) {
             info.textContent = 'Sesi telah berakhir. Percakapan hanya dapat dibaca.';
             badge.textContent = 'Sesi selesai';
-            badge.className = 'inline-flex px-3 py-1 rounded-full border text-[11px] font-semibold bg-sage-200 text-sage-900 border-sage-200';
+            badge.className = 'inline-flex px-3.5 py-1 rounded-full border text-[11px] font-semibold bg-[#EEE7F2] text-[#3E293F] border-[#DCD5DD]';
         } else {
             badge.textContent = 'Sesi berlangsung';
-            badge.className = 'inline-flex px-3 py-1 rounded-full border text-[11px] font-semibold bg-emerald-100 text-emerald-800 border-emerald-200';
+            badge.className = 'inline-flex px-3.5 py-1 rounded-full border text-[11px] font-semibold bg-green-100 text-green-700 border-green-200';
         }
     }
 
