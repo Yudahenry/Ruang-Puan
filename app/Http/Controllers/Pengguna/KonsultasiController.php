@@ -14,10 +14,12 @@ class KonsultasiController extends Controller
     public function index()
     {
         $konsolors = Konselor::where('status_verifikasi', 'disetujui')
-                       ->whereHas('user', fn ($q) => $q->where('status', 'aktif'))
+            ->whereHas('user', fn ($q) => $q->where('status', 'aktif'))
             ->with(['user', 'jadwalKonsultasis' => function($query) {
                 $query->where('status', 'tersedia')
-                      ->where('tanggal', '>=', now()->toDateString());
+                      ->whereDate('tanggal', '>=', now()->toDateString())
+                      ->orderBy('tanggal', 'asc')
+                      ->orderBy('jam_mulai', 'asc');
             }])
             ->get();
 
@@ -26,10 +28,18 @@ class KonsultasiController extends Controller
 
     public function pilihJadwal(Konselor $konselor)
     {
-           abort_unless($konselor->user && $konselor->user->status === 'aktif', 404);
-    $konselor->load(['user', 'jadwalKonsultasis' => function($query) {
+        abort_unless(
+            $konselor->status_verifikasi === 'disetujui' &&
+            $konselor->user &&
+            $konselor->user->status === 'aktif',
+            404
+        );
+
+        $konselor->load(['user', 'jadwalKonsultasis' => function($query) {
             $query->where('status', 'tersedia')
-                  ->where('tanggal', '>=', now()->toDateString());
+                  ->whereDate('tanggal', '>=', now()->toDateString())
+                  ->orderBy('tanggal', 'asc')
+                  ->orderBy('jam_mulai', 'asc');
         }]);
 
         // Perhatikan: diarahkan ke folder 'konsultasi.jadwal'
