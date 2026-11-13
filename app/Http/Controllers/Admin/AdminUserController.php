@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\LogAktivitas;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -26,6 +27,11 @@ class AdminUserController extends Controller
 
         $statusBaru = $user->status === 'aktif' ? 'nonaktif' : 'aktif';
         $user->forceFill(['status' => $statusBaru])->save();
+
+        LogAktivitas::catat(
+            $statusBaru === 'nonaktif' ? 'akun_dinonaktifkan_admin' : 'akun_diaktifkan_admin',
+            'Status akun pengguna ID '.$user->id.' diubah oleh admin'
+        );
 
         // Akun yang dinonaktifkan langsung keluar dari semua perangkat
         if ($statusBaru === 'nonaktif') {
