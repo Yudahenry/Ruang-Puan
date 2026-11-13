@@ -26,7 +26,7 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:150', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'alias' => ['nullable', 'string', 'max:100'],
-            'role' => ['required', 'in:pengguna,konselor,admin'],
+            'role' => ['required', 'in:pengguna,konselor'],
         ]);
 
         $user = User::create([
@@ -43,15 +43,6 @@ class RegisteredUserController extends Controller
             \App\Models\Konselor::create([
                 'user_id' => $user->id,
                 'status_verifikasi' => 'menunggu',
-            ]);
-        }
-
-        // Jika mendaftar sebagai admin, otomatis daftarkan juga ke tabel admins
-        if ($request->role === 'admin') {
-            \App\Models\Admin::create([
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'password' => $user->password, // Password sudah di-hash dari user
             ]);
         }
 

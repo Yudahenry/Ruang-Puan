@@ -85,6 +85,10 @@ Route::middleware(['auth'])->prefix('konsultasi')->name('konsultasi.')->group(fu
     Route::get('/pilih/{konselor}', [KonsultasiController::class, 'pilihJadwal'])->name('jadwal');
     Route::get('/konselor/{konselor}', [\App\Http\Controllers\KonselorPublikController::class, 'show'])->name('konselor.profil');
     Route::post('/store', [KonsultasiController::class, 'store'])->name('store');
+    
+    // Rute Baru: Fitur Pembayaran Konsultasi
+    Route::get('/{id}/tagihan', [KonsultasiController::class, 'showTagihan'])->name('tagihan');
+    Route::post('/{id}/bayar', [KonsultasiController::class, 'bayar'])->name('bayar');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('konsultasi')->name('konsultasi.')->group(function () {
