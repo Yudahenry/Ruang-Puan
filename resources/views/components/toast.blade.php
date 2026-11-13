@@ -1,4 +1,4 @@
-@props(['message', 'type' => 'success'])
+\@props(['message', 'type' => 'success'])
 
 @if(session($type) || isset($message))
     <div x-data="{ show: true }"
@@ -10,16 +10,17 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 sm:translate-x-0 scale-100"
          x-transition:leave-end="opacity-0 sm:translate-x-6 scale-95"
-         class="fixed top-6 right-6 z-50 max-w-sm w-full shadow-xl rounded-xl p-4 border flex items-start justify-between space-x-3
-         @if($type === 'success') bg-white border-success-600/30 text-ink-900 shadow-success-600/10
-         @elseif($type === 'error' || $type === 'danger') bg-white border-danger-600/30 text-ink-900 shadow-danger-600/10
-         @else bg-white border-info-600/30 text-ink-900 shadow-info-600/10 @endif"
+         class="fixed top-6 right-6 z-50 max-w-sm w-full shadow-xl rounded-3xl p-4 border flex items-start justify-between space-x-3 bg-white
+         @if($type === 'success') border-emerald-500/30 shadow-emerald-900/5
+         @elseif($type === 'error' || $type === 'danger') border-rose-500/30 shadow-rose-900/5
+         @else border-[#643B62]/30 shadow-[#3E293F]/5 @endif"
          role="alert">
+         
         <div class="flex items-start space-x-3">
-            <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold
-                @if($type === 'success') bg-success-100 text-success-600
-                @elseif($type === 'error' || $type === 'danger') bg-danger-100 text-danger-600
-                @else bg-info-100 text-info-600 @endif">
+            <div class="flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-bold shadow-inner
+                @if($type === 'success') bg-emerald-100 text-emerald-800
+                @elseif($type === 'error' || $type === 'danger') bg-rose-100 text-rose-800
+                @else bg-[#EEE7F2] text-[#643B62] @endif">
                 @if($type === 'success')
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
                 @else
@@ -27,16 +28,17 @@
                 @endif
             </div>
             <div>
-                <p class="text-xs font-semibold uppercase tracking-wider
-                    @if($type === 'success') text-success-600
-                    @elseif($type === 'error' || $type === 'danger') text-danger-600
-                    @else text-info-600 @endif">
+                <p class="text-[10px] font-bold uppercase tracking-wider
+                    @if($type === 'success') text-emerald-800
+                    @elseif($type === 'error' || $type === 'danger') text-rose-800
+                    @else text-[#643B62] @endif">
                     {{ $type === 'success' ? 'Berhasil' : 'Perhatian' }}
                 </p>
-                <p class="text-sm text-ink-900 mt-0.5 leading-snug">{{ $message ?? session($type) }}</p>
+                <p class="text-xs text-[#3E293F] mt-0.5 leading-relaxed font-medium">{{ $message ?? session($type) }}</p>
             </div>
         </div>
-        <button @click="show = false" class="text-ink-600 hover:text-ink-900 p-1 rounded-md transition" aria-label="Tutup">
+        
+        <button @click="show = false" class="text-[#746B77] hover:text-[#3E293F] p-1 rounded-lg transition" aria-label="Tutup">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
     </div>

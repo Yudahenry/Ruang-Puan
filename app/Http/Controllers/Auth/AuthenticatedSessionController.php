@@ -25,7 +25,7 @@ class AuthenticatedSessionController extends Controller
 
         // Ambil data role yang dipilih user dari form
         $selectedRole = $request->input('role');
-        
+
         // Pisahkan kredensial login (email & password) untuk proses Auth::attempt
         $authCredentials = $request->only('email', 'password');
 
@@ -38,6 +38,17 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
+
+        // Blokir akun yang sudah dinonaktifkan
+        if ($user->status !== 'aktif') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'email' => 'Akun ini sudah dinonaktifkan. Hubungi admin jika ingin mengaktifkannya kembali.',
+            ])->onlyInput('email');
+        }
 
         // Validasi tambahan: Pastikan role akun di database sesuai dengan role yang dipilih saat login
         if ($user->role !== $selectedRole) {

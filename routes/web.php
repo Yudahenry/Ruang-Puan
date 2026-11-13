@@ -17,10 +17,13 @@ use App\Http\Controllers\Admin\AdminEdukasiController;
 use App\Http\Controllers\Admin\AdminDirektoriController;
 use App\Http\Controllers\Admin\AdminKonselorController;
 use App\Http\Controllers\Admin\VerifikasiKonselorController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Pengguna\KonsultasiController;
 use App\Http\Controllers\Konselor\JadwalKonsultasiController;
+use App\Http\Controllers\ChatKonsultasiController;
+use App\Http\Controllers\Konselor\BerandaKonselorController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -56,6 +59,11 @@ Route::match(['get', 'post'], 'logout', [AuthenticatedSessionController::class, 
 Route::middleware('auth')->group(function () {
     Route::get('profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('profil/password', [\App\Http\Controllers\ProfilePasswordController::class, 'update'])->name('profile.password');
+    Route::delete('profil/sesi', [\App\Http\Controllers\ProfileSessionController::class, 'destroyOthers'])->name('profile.sessions.destroy');
+        Route::delete('/profil/akun', [\App\Http\Controllers\ProfileAccountController::class, 'deactivate'])->name('profile.deactivate');
+    Route::post('profil/foto', [\App\Http\Controllers\ProfilePhotoController::class, 'update'])->name('profile.photo.update');
+    Route::delete('profil/foto', [\App\Http\Controllers\ProfilePhotoController::class, 'destroy'])->name('profile.photo.destroy');
 
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
@@ -75,11 +83,18 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->prefix('konsultasi')->name('konsultasi.')->group(function () {
     Route::get('/', [KonsultasiController::class, 'index'])->name('index');
     Route::get('/pilih/{konselor}', [KonsultasiController::class, 'pilihJadwal'])->name('jadwal');
+    Route::get('/konselor/{konselor}', [\App\Http\Controllers\KonselorPublikController::class, 'show'])->name('konselor.profil');
     Route::post('/store', [KonsultasiController::class, 'store'])->name('store');
     
     // Rute Baru: Fitur Pembayaran Konsultasi
     Route::get('/{id}/tagihan', [KonsultasiController::class, 'showTagihan'])->name('tagihan');
     Route::post('/{id}/bayar', [KonsultasiController::class, 'bayar'])->name('bayar');
+});
+
+Route::middleware(['auth', 'verified'])->prefix('konsultasi')->name('konsultasi.')->group(function () {
+    Route::get('/{konsultasi}/chat', [ChatKonsultasiController::class, 'show'])->name('chat');
+    Route::get('/{konsultasi}/chat/pesan', [ChatKonsultasiController::class, 'pesan'])->name('chat.pesan');
+    Route::post('/{konsultasi}/chat/kirim', [ChatKonsultasiController::class, 'kirim'])->name('chat.kirim');
 });
 
 // ==========================================
@@ -96,6 +111,8 @@ Route::middleware(['auth', 'role:pengguna'])->prefix('pelaporan')->name('pelapor
     Route::get('/buat', [LaporanController::class, 'create'])->name('buat');
     Route::post('/', [LaporanController::class, 'store'])->name('store');
     Route::get('/riwayat', [LaporanController::class, 'index'])->name('riwayat');
+    Route::get('/cek', [LaporanController::class, 'cek'])->name('cek');
+    Route::get('/bukti/{id}', [LaporanController::class, 'unduhBukti'])->name('bukti');
 });
 
 Route::middleware(['auth'])->get('/pelaporan/lacak/{kode}', [LaporanController::class, 'lacak'])->name('pelaporan.lacak');
@@ -128,8 +145,12 @@ Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admi
     Route::post('/konselor/{id}/verifikasi', [AdminKonselorController::class, 'verifikasi'])->name('konselor.verifikasi');
     Route::post('/konselor/{id}/tolak', [AdminKonselorController::class, 'tolak'])->name('konselor.tolak');
     Route::get('/verifikasi-konselor', [AdminKonselorController::class, 'index'])->name('verifikasi.index');
-});
 
+    // Admin Manajemen User / Akun Pengguna
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+    Route::patch('/users/{id}/status', [AdminUserController::class, 'toggleStatus'])->name('users.status');
+});
 Route::redirect('/verifikasi-konselor', '/admin/konselor');
 
 // ==========================================
@@ -137,17 +158,58 @@ Route::redirect('/verifikasi-konselor', '/admin/konselor');
 // ==========================================
 Route::middleware(['auth', 'verified', 'role:pengguna'])->prefix('pengguna')->name('pengguna.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Pengguna\BerandaController::class, 'index'])->name('dashboard');
+
+    // Riwayat Konsultasi Pengguna
+    Route::get('/riwayat-konsultasi',
+        [\App\Http\Controllers\Pengguna\RiwayatKonsultasiController::class, 'index']
+    )->name('riwayat-konsultasi');
+
+    // Chat Pengguna
+    Route::get('/chat/{id}',
+        [\App\Http\Controllers\Pengguna\ChatController::class, 'show']
+    )->name('chat.show');
+
+    Route::post('/chat/{id}',
+        [\App\Http\Controllers\Pengguna\ChatController::class, 'store']
+    )->name('chat.store');
 });
 
-// --- RUTE KONSELOR (MANAJEMEN JADWAL PRAKTIK) ---
+// --- RUTE KONSELOR (MANAJEMEN JADWAL PRAKTIK, BERANDA & CHAT) ---
 Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->name('konselor.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('konselor.dashboard');
-    })->name('dashboard');
+    Route::get('/profil', [\App\Http\Controllers\Konselor\ProfilController::class, 'edit'])->name('profil.edit');
+    Route::put('/profil/{bagian}', [\App\Http\Controllers\Konselor\ProfilController::class, 'update'])->where('bagian', 'identitas|kredensial|layanan|rekening|kode-etik')->name('profil.update');
+    
+    Route::get('/dashboard', [BerandaKonselorController::class, 'index'])->name('dashboard');
 
     Route::get('/jadwal', [JadwalKonsultasiController::class, 'index'])->name('jadwal');
     Route::post('/jadwal', [JadwalKonsultasiController::class, 'store'])->name('jadwal.store');
     Route::delete('/jadwal/{id}', [JadwalKonsultasiController::class, 'destroy'])->name('jadwal.destroy');
+
+    // Booking (aksi dari dashboard)
+    Route::post('/booking/{id}/konfirmasi', [BerandaKonselorController::class, 'konfirmasiBooking'])->name('booking.konfirmasi');
+    Route::post('/booking/{id}/tolak', [BerandaKonselorController::class, 'tolakBooking'])->name('booking.tolak');
+
+    // Chat Konselor
+    Route::post('/chat/kirim', [BerandaKonselorController::class, 'kirimPesan'])->name('chat.kirim');
+
+    Route::get('/chat/{id}',
+        [\App\Http\Controllers\Konselor\ChatController::class, 'show']
+    )->whereNumber('id')->name('chat.show');
+
+    Route::post('/chat/{id}',
+        [\App\Http\Controllers\Konselor\ChatController::class, 'store']
+    )->whereNumber('id')->name('chat.store');
+
+    // Navigasi pendukung konselor
+    Route::get('/booking', function () {
+        return redirect()->route('konselor.dashboard', ['tab' => 'booking']);
+    })->name('booking');
+    Route::get('/chat', function () {
+        return redirect()->route('konselor.dashboard', ['modal' => 'chat']);
+    })->name('chat');
+    Route::get('/riwayat', function () {
+        return redirect()->route('konselor.dashboard', ['tab' => 'riwayat']);
+    })->name('riwayat');
 });
 
 Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

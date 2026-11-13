@@ -5,10 +5,10 @@
     {{-- Header Section --}}
     <div class="flex items-end justify-between mb-6">
         <div>
-            <span class="text-[10px] font-semibold text-sage-600 tracking-[0.15em] uppercase">Bekal Untuk Bertumbuh</span>
-            <h2 class="text-2xl sm:text-3xl font-bold font-fraunces text-sage-900 mt-1">Sedikit belajar, lebih berdaya</h2>
+            <span class="text-[10px] font-semibold text-[#643B62] tracking-[0.15em] uppercase">Bekal Untuk Bertumbuh</span>
+            <h2 class="text-2xl sm:text-3xl font-serif font-medium text-[#3E293F] mt-1">Sedikit belajar, lebih berdaya</h2>
         </div>
-        <a href="{{ route('edukasi.index') }}" class="text-xs font-semibold text-sage-700 hover:text-sage-900 flex items-center space-x-1 transition group">
+        <a href="{{ route('edukasi.index') }}" class="text-xs font-semibold text-[#643B62] hover:text-[#3E293F] flex items-center space-x-1 transition group">
             <span>Jelajahi semua materi</span>
             <span class="transform group-hover:translate-x-1 transition">&nearr;</span>
         </a>
@@ -34,10 +34,10 @@
         @endphp
 
         @forelse($materiEdukasis as $index => $materi)
-            <a href="{{ route('edukasi.show', $materi->id) }}" class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-sage-200/80 flex flex-col justify-between transform hover:-translate-y-1">
+            <a href="{{ route('edukasi.show', $materi->id) }}" class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-[#DCD5DD] flex flex-col justify-between transform hover:-translate-y-1">
                 <div>
                     {{-- Thumbnail / Banner --}}
-                    <div class="h-40 bg-sage-200 relative overflow-hidden">
+                    <div class="h-40 bg-[#EEE7F2] relative overflow-hidden">
                         @if($materi->file_url)
                             <img src="{{ $materi->file_url }}" alt="{{ $materi->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                         @else
@@ -47,19 +47,19 @@
 
                     {{-- Content --}}
                     <div class="p-4">
-                        <span class="text-[9px] font-bold text-sage-600 tracking-[0.12em] uppercase">
+                        <span class="text-[9px] font-bold text-[#643B62] tracking-[0.12em] uppercase">
                             {{ $materi->kategoriEdukasi->nama_kategori ?? $fallbackCategories[$index % 4] }}
                         </span>
-                        <h3 class="font-bold text-sage-900 text-sm font-fraunces line-clamp-2 group-hover:text-sage-600 transition leading-snug mt-1.5">
+                        <h3 class="font-bold text-[#3E293F] text-sm font-serif line-clamp-2 group-hover:text-[#643B62] transition leading-snug mt-1.5">
                             {{ $materi->judul }}
                         </h3>
                     </div>
                 </div>
 
                 {{-- Footer Card --}}
-                <div class="px-4 pb-4 pt-1 flex items-center justify-between text-xs text-sage-500">
+                <div class="px-4 pb-4 pt-1 flex items-center justify-between text-xs text-[#746B77]">
                     <span>{{ $fallbackReadTimes[$index % 4] }}</span>
-                    <div class="w-7 h-7 rounded-full bg-sage-100 text-sage-700 flex items-center justify-center group-hover:bg-sage-700 group-hover:text-white transition">
+                    <div class="w-7 h-7 rounded-full bg-[#EEE7F2] text-[#643B62] flex items-center justify-center group-hover:bg-[#3E293F] group-hover:text-white transition">
                         &nearr;
                     </div>
                 </div>
@@ -67,21 +67,21 @@
         @empty
             {{-- Placeholder cards when no data --}}
             @for($i = 0; $i < 4; $i++)
-                <div class="group bg-white rounded-2xl overflow-hidden shadow-sm border border-sage-200/80 flex flex-col justify-between">
+                <div class="group bg-white rounded-2xl overflow-hidden shadow-sm border border-[#DCD5DD] flex flex-col justify-between">
                     <div>
-                        <div class="h-40 bg-sage-200 relative overflow-hidden">
+                        <div class="h-40 bg-[#EEE7F2] relative overflow-hidden">
                             <img src="{{ asset($fallbackImages[$i]) }}" alt="{{ $fallbackTitles[$i] }}" class="w-full h-full object-cover">
                         </div>
                         <div class="p-4">
-                            <span class="text-[9px] font-bold text-sage-600 tracking-[0.12em] uppercase">{{ $fallbackCategories[$i] }}</span>
-                            <h3 class="font-bold text-sage-900 text-sm font-fraunces line-clamp-2 leading-snug mt-1.5">
+                            <span class="text-[9px] font-bold text-[#643B62] tracking-[0.12em] uppercase">{{ $fallbackCategories[$i] }}</span>
+                            <h3 class="font-bold text-[#3E293F] text-sm font-serif line-clamp-2 leading-snug mt-1.5">
                                 {{ $fallbackTitles[$i] }}
                             </h3>
                         </div>
                     </div>
-                    <div class="px-4 pb-4 pt-1 flex items-center justify-between text-xs text-sage-500">
+                    <div class="px-4 pb-4 pt-1 flex items-center justify-between text-xs text-[#746B77]">
                         <span>{{ $fallbackReadTimes[$i] }}</span>
-                        <div class="w-7 h-7 rounded-full bg-sage-100 text-sage-700 flex items-center justify-center">
+                        <div class="w-7 h-7 rounded-full bg-[#EEE7F2] text-[#643B62] flex items-center justify-center">
                             &nearr;
                         </div>
                     </div>
