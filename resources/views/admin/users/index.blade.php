@@ -25,6 +25,7 @@
                         <th class="p-4">Nama Lengkap</th>
                         <th class="p-4">Email</th>
                         <th class="p-4">Role / Peran</th>
+                        <th class="p-4">Status</th>
                         <th class="p-4">Tanggal Daftar</th>
                         <th class="p-4 text-center">Aksi</th>
                     </tr>
@@ -33,7 +34,7 @@
                     @forelse($users as $index => $user)
                         <tr class="hover:bg-gray-50/50 transition">
                             <td class="p-4">{{ $users->firstItem() + $index }}</td>
-                            <td class="p-4 font-medium text-gray-900">{{ $user->name }}</td>
+                            <td class="p-4 font-medium text-gray-900">{{ $user->nama }}</td>
                             <td class="p-4 text-gray-600">{{ $user->email }}</td>
                             <td class="p-4">
                                 <span class="px-2.5 py-1 text-xs font-semibold rounded-full
@@ -41,24 +42,36 @@
                                     {{ ucwords($user->role ?? 'Pengguna') }}
                                 </span>
                             </td>
+                            <td class="p-4">
+                                <span class="px-2.5 py-1 text-xs font-semibold rounded-full
+                                    {{ $user->status === 'aktif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                    {{ $user->status === 'aktif' ? 'Aktif' : 'Nonaktif' }}
+                                </span>
+                            </td>
                             <td class="p-4 text-gray-500">{{ $user->created_at?->format('d M Y, H:i') ?? '-' }}</td>
                             <td class="p-4 text-center">
-                                @if($user->id !== auth()->id())
-                                    <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus akun ini?');">
+                                @if($user->id === auth()->id())
+                                    <span class="text-xs text-gray-400 italic">Akun Anda</span>
+                                @elseif($user->role === 'admin')
+                                    <span class="text-xs text-gray-400 italic">-</span>
+                                @else
+                                    <form action="{{ route('admin.users.status', $user->id) }}" method="POST"
+                                          onsubmit="return confirm('{{ $user->status === 'aktif' ? 'Nonaktifkan akun ini? Pengguna akan keluar dari semua perangkat.' : 'Aktifkan kembali akun ini?' }}');">
                                         @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="px-3 py-1 bg-red-50 text-red-600 rounded hover:bg-red-100 transition text-xs font-medium">
-                                            Hapus
+                                        @method('PATCH')
+                                        <button type="submit"
+                                                class="px-3 py-1 rounded transition text-xs font-medium {{ $user->status === 'aktif' ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100' }}">
+                                            {{ $user->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}
                                         </button>
                                     </form>
-                                @else
-                                    <span class="text-xs text-gray-400 italic">Akun Anda</span>
                                 @endif
+
+                                {{-- Tombol Hapus disembunyikan sementara: aturan hapus akun (R08) menunggu keputusan tim --}}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="p-6 text-center text-gray-500 italic">Belum ada akun pengguna yang terdaftar.</td>
+                            <td colspan="7" class="p-6 text-center text-gray-500 italic">Belum ada akun pengguna yang terdaftar.</td>
                         </tr>
                     @endforelse
                 </tbody>

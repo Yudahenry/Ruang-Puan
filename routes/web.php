@@ -145,8 +145,8 @@ Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admi
     // Admin Manajemen User / Akun Pengguna
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+    Route::patch('/users/{id}/status', [AdminUserController::class, 'toggleStatus'])->name('users.status');
 });
-
 Route::redirect('/verifikasi-konselor', '/admin/konselor');
 
 // ==========================================
