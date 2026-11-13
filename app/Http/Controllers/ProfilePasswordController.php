@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LogAktivitas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -24,6 +25,8 @@ class ProfilePasswordController extends Controller
         $request->user()->update([
             'password' => Hash::make($request->password),
         ]);
+
+        LogAktivitas::catat('kata_sandi_diubah', 'Pengguna mengganti kata sandi');
 
         return back()->with('success', 'Kata sandi berhasil diperbarui.');
     }
