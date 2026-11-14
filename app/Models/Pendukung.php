@@ -23,22 +23,3 @@ class Notifikasi extends Model
         return $this->belongsTo(User::class);
     }
 }
-
-class LogAktivitas extends Model
-{
-    protected $table = 'log_aktivitas';
-    public $timestamps = false;
-
-    protected $fillable = [
-        'user_id',
-        'aktivitas',
-        'keterangan',
-        'ip_address',
-        'created_at',
-    ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-}
