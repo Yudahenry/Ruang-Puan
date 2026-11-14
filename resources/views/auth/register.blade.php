@@ -40,8 +40,8 @@
         </div>
 
         <div class="mt-8">
-            <div class="rounded-2xl overflow-hidden h-52 xl:h-60 bg-[#e0d3e5] mb-8">
-                <img src="{{ asset('images/login-hero.png') }}" alt="Ilustrasi dua perempuan bercerita"
+            <div class="rounded-2xl overflow-hidden h-52 xl:h-60 bg-[#e0d3e5] mb-8 shadow-sm border border-[#d9cfde]">
+                <img src="{{ asset('images/gambar_login.jpg') }}" alt="Ilustrasi dua perempuan bercerita"
                      class="w-full h-full object-cover"
                      onerror="this.style.display='none'">
             </div>
