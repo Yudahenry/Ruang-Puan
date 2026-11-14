@@ -133,9 +133,22 @@
                     <div class="px-4 py-3 border-b border-[#DCD5DD]/60">
                         <p class="font-bold text-[#3E293F]">{{ $counselorName }}</p>
                         <p class="text-[#746B77] text-[11px] truncate">{{ $user->email ?? 'konselor@ruangpuan.test' }}</p>
-                        <span class="inline-block mt-1.5 px-2.5 py-0.5 bg-[#EEE7F2] text-[#643B62] rounded-full text-[10px] font-semibold">
-                            ✓ Konselor Terverifikasi
-                        </span>
+                        @php
+                            $navStatusVerif = $user->konselor->status_verifikasi ?? 'menunggu';
+                        @endphp
+                        @if($navStatusVerif === 'disetujui')
+                            <span class="inline-block mt-1.5 px-2.5 py-0.5 bg-[#EEE7F2] text-[#643B62] rounded-full text-[10px] font-semibold">
+                                ✓ Konselor Terverifikasi
+                            </span>
+                        @elseif($navStatusVerif === 'ditolak')
+                            <span class="inline-block mt-1.5 px-2.5 py-0.5 bg-rose-100 text-rose-700 rounded-full text-[10px] font-semibold">
+                                ✕ Verifikasi Ditolak
+                            </span>
+                        @else
+                            <span class="inline-block mt-1.5 px-2.5 py-0.5 bg-amber-100 text-amber-800 rounded-full text-[10px] font-semibold">
+                                ⏳ Menunggu Verifikasi
+                            </span>
+                        @endif
                     </div>
 
                     <div class="py-1">
