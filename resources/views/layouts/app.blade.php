@@ -10,14 +10,6 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="bg-[#FCFAF8] text-[#3E293F] font-sans antialiased min-h-screen flex flex-col selection:bg-[#EEE7F2] selection:text-[#3E293F]" x-data="{ mobileMenuOpen: false }">
-        
-        <!-- Toast Notifications -->
-        @if(session('success'))
-            <x-toast type="success" :message="session('success')" />
-        @endif
-        @if(session('error'))
-            <x-toast type="error" :message="session('error')" />
-        @endif
 
         <!-- Master Header / Navbar slot -->
         @hasSection('header-nav')
