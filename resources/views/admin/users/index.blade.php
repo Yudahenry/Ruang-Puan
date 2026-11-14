@@ -4,8 +4,8 @@
 <div class="container-fluid px-4 py-4">
     <!-- Judul & Deskripsi -->
     <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Manajemen Akun Pengguna & Konselor</h2>
-        <p class="text-sm text-gray-600">Daftar seluruh akun yang terdaftar di dalam sistem Ruang Puan.</p>
+        <h2 class="text-2xl font-bold text-gray-800">Manajemen Akun</h2>
+        <p class="text-sm text-gray-600">Daftar akun yang terdaftar di dalam sistem Ruang Puan, dipisah menurut peran.</p>
     </div>
 
     <!-- Notifikasi Sukses -->
@@ -14,6 +14,20 @@
             {{ session('success') }}
         </div>
     @endif
+
+    <!-- Tab Peran -->
+    @php
+        $tabs = ['pengguna' => 'Pengguna', 'konselor' => 'Konselor', 'admin' => 'Admin'];
+    @endphp
+    <div class="mb-4 flex flex-wrap items-center gap-1 bg-white p-1 rounded-lg border border-gray-100 w-fit">
+        @foreach($tabs as $kode => $label)
+            <a href="{{ route('admin.users.index', ['peran' => $kode]) }}"
+               class="px-4 py-2 rounded-lg text-sm font-semibold transition {{ $peran === $kode ? 'bg-purple-700 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900' }}">
+                {{ $label }}
+                <span class="ml-1 text-xs {{ $peran === $kode ? 'text-purple-100' : 'text-gray-400' }}">({{ $jumlah[$kode] ?? 0 }})</span>
+            </a>
+        @endforeach
+    </div>
 
     <!-- Tabel Daftar Akun -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
@@ -24,7 +38,6 @@
                         <th class="p-4">No</th>
                         <th class="p-4">Nama Lengkap</th>
                         <th class="p-4">Email</th>
-                        <th class="p-4">Role / Peran</th>
                         <th class="p-4">Status</th>
                         <th class="p-4">Tanggal Daftar</th>
                         <th class="p-4 text-center">Aksi</th>
@@ -36,12 +49,6 @@
                             <td class="p-4">{{ $users->firstItem() + $index }}</td>
                             <td class="p-4 font-medium text-gray-900">{{ $user->nama }}</td>
                             <td class="p-4 text-gray-600">{{ $user->email }}</td>
-                            <td class="p-4">
-                                <span class="px-2.5 py-1 text-xs font-semibold rounded-full
-                                    {{ $user->role == 'admin' ? 'bg-purple-100 text-purple-800' : ($user->role == 'konselor' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800') }}">
-                                    {{ ucwords($user->role ?? 'Pengguna') }}
-                                </span>
-                            </td>
                             <td class="p-4">
                                 <span class="px-2.5 py-1 text-xs font-semibold rounded-full
                                     {{ $user->status === 'aktif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -71,7 +78,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="p-6 text-center text-gray-500 italic">Belum ada akun pengguna yang terdaftar.</td>
+                            <td colspan="6" class="p-6 text-center text-gray-500 italic">Belum ada akun dengan peran ini.</td>
                         </tr>
                     @endforelse
                 </tbody>
