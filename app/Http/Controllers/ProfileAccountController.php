@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
+use App\Models\LogAktivitas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,7 @@ class ProfileAccountController extends Controller
         ]);
 
         $user->forceFill(['status' => 'nonaktif'])->save();
+        LogAktivitas::catat('akun_dinonaktifkan_sendiri', 'Pengguna menonaktifkan akunnya sendiri', $user->id);
         DB::table('sessions')->where('user_id', $user->id)->delete();
 
         Auth::guard('web')->logout();
