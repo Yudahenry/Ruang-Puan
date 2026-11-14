@@ -62,6 +62,8 @@
         </div>
     </div>
 
+    @include('konselor._sesi-chat')
+
     <!-- 3. MAIN GRID (KOLOM UTAMA & SIDEBAR BOOKING) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
