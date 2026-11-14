@@ -43,7 +43,7 @@
             </div>
         </div>
 
-        <!-- Card 4: Sesi Konsultasi & Transaksi (Opsional aman jika modelnya ada) -->
+        <!-- Card 4: Sesi Konsultasi & Transaksi -->
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500 font-medium">Konsultasi / Transaksi</p>
@@ -58,7 +58,7 @@
     </div>
 
     <!-- Pintasan / Menu Cepat -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
         <h3 class="text-md font-semibold text-gray-800 mb-4">Akses Cepat Pengelolaan</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <a href="{{ route('admin.laporan.index') }}" class="p-4 border rounded-lg hover:bg-gray-50 transition flex items-center space-x-3">
@@ -84,5 +84,104 @@
             </a>
         </div>
     </div>
+
+    <!-- GRAFIK / CHART STATISTIK -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Chart 1: Perkembangan Laporan Masuk -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-md font-semibold text-gray-800">Perkembangan Laporan Masuk</h3>
+                <span class="text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md">Bulanan</span>
+            </div>
+            <div class="h-64 relative">
+                <canvas id="laporanChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 2: Proporsi Pengguna & Konselor -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-md font-semibold text-gray-800">Proporsi Pengguna</h3>
+                <span class="text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md">Total User</span>
+            </div>
+            <div class="h-64 relative flex items-center justify-center">
+                <canvas id="userChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 3: Keuangan & Pendapatan Komisi -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 lg:col-span-3">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-md font-semibold text-gray-800">Statistik Keuangan & Pendapatan Komisi</h3>
+                    <p class="text-xs text-gray-500">Pendapatan dari persentase pajak/biaya layanan sesi konsultasi konselor</p>
+                </div>
+                <span class="text-xs text-purple-700 bg-purple-50 font-semibold px-2.5 py-1 rounded-md">Bisnis Model: Komisi Konselor</span>
+            </div>
+            <div class="h-64 relative">
+                <canvas id="keuanganChart"></canvas>
+            </div>
+        </div>
+
+    </div>
 </div>
+
+<!-- Script Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 1. Chart Laporan (Line) - Sinkron dengan jumlah laporan di database
+    const ctxLaporan = document.getElementById('laporanChart').getContext('2d');
+    new Chart(ctxLaporan, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+            datasets: [{
+                label: 'Jumlah Laporan',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ \App\Models\Laporan::count() }}, 0],
+                borderColor: '#643B62',
+                backgroundColor: 'rgba(100, 59, 98, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // 2. Chart Proporsi User (Doughnut) - Sinkron dengan data database User
+    const ctxUser = document.getElementById('userChart').getContext('2d');
+    new Chart(ctxUser, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pengguna/Pelapor', 'Konselor'],
+            datasets: [{
+                data: [
+                    {{ \App\Models\User::where('role', 'pengguna')->count() }}, 
+                    {{ \App\Models\User::where('role', 'konselor')->count() }}
+                ],
+                backgroundColor: ['#643B62', '#C2A7BE'],
+                borderWidth: 0
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // 3. Chart Keuangan / Komisi Konselor (Bar) - Dinamis berdasarkan jumlah konselor
+    const totalKonselor = {{ \App\Models\User::where('role', 'konselor')->count() }};
+    const ctxKeuangan = document.getElementById('keuanganChart').getContext('2d');
+    new Chart(ctxKeuangan, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+            datasets: [{
+                label: 'Pendapatan Komisi (Rp)',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, totalKonselor * 75000, 0],
+                backgroundColor: '#643B62',
+                borderRadius: 6
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+</script>
 @endsection
