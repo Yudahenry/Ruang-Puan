@@ -2,10 +2,7 @@
 
 @section('pengguna-content')
 <div class="bg-[#FCFAF8] min-h-screen text-[#3E293F] pb-16">
-    {{-- 1. NAVBAR --}}
-    <x-beranda.navbar />
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         {{-- 2. BREADCRUMB --}}
         <nav class="flex items-center gap-2 text-xs text-[#746B77] py-3 mb-2" aria-label="Breadcrumb">
             <a href="{{ route('beranda') }}" class="hover:text-[#3E293F] transition">Beranda</a>
@@ -138,8 +135,5 @@
             </aside>
         </div>
     </div>
-
-    {{-- 5. FOOTER --}}
-    <x-pelaporan.footer />
 </div>
 @endsection

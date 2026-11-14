@@ -45,6 +45,7 @@
 
             <main class="flex-1 overflow-y-auto">
                 @yield('content')
+                @yield('admin-content')
             </main>
         </div>
 
