@@ -41,9 +41,8 @@
 
         <div class="mt-8">
             <div class="rounded-2xl overflow-hidden h-48 xl:h-56 bg-white/60 border border-[#DCD5DD] mb-8 shadow-sm">
-                <img src="{{ asset('images/login-hero.png') }}" alt="Ilustrasi dua perempuan bercerita"
-                     class="w-full h-full object-cover"
-                     onerror="this.style.display='none'">
+                <img src="{{ asset('images/gambar_login.jpg') }}" alt="Ilustrasi dua perempuan bercerita"
+                     class="w-full h-full object-cover">
             </div>
 
             <p class="font-heading text-sm font-medium mb-4 text-[#3E293F]">Untuk setiap langkahmu.</p>
