@@ -52,6 +52,7 @@
             <!-- Area Konten Utama (HANYA BAGIAN INI YANG BISA DI-SCROLL KE BAWAH) -->
             <main class="flex-1 overflow-y-auto p-6">
                 @yield('content')
+                @yield('admin-content')
             </main>
         </div>
 
