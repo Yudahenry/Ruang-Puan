@@ -32,6 +32,19 @@ class BerandaController extends Controller
             ->select('pemesanans.*')
             ->first();
 
+        // Pastikan relasi konsultasi selalu tersedia bila pemesanan terkonfirmasi
+        if ($konsultasiMendatang && $konsultasiMendatang->status === 'terkonfirmasi' && !$konsultasiMendatang->konsultasi) {
+            $konsultasi = \App\Models\Konsultasi::firstOrCreate(
+                ['pemesanan_id' => $konsultasiMendatang->id],
+                [
+                    'tanggal_konsultasi' => $konsultasiMendatang->jadwalKonsultasi?->tanggal,
+                    'jam_konsultasi'     => $konsultasiMendatang->jadwalKonsultasi?->jam_mulai,
+                    'status'             => 'terjadwal',
+                ]
+            );
+            $konsultasiMendatang->setRelation('konsultasi', $konsultasi);
+        }
+
         // Section 5: Materi edukasi terbaru (4 items)
         $materiEdukasis = MateriEdukasi::with('kategoriEdukasi')
             ->where('status', 'publish')

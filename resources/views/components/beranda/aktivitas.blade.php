@@ -142,7 +142,7 @@
                         {{-- Nama Konselor with Calendar Badge --}}
                         <div class="flex items-start space-x-4">
                             <div class="flex-shrink-0 w-14 h-16 bg-white rounded-2xl border border-[#DCD5DD] flex flex-col items-center justify-center shadow-sm">
-                                <span class="text-[9px] font-semibold text-[#746B77] uppercase tracking-wider">{{ strtoupper(\Carbon\Carbon::parse($jadwal->tanggal)->format('M')) }}</span>
+                                <span class="text-[9px] font-semibold text-[#746B77] uppercase tracking-wider">{{ strtoupper(\Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('M')) }}</span>
                                 <span class="text-2xl font-serif font-bold text-[#3E293F] leading-none">{{ \Carbon\Carbon::parse($jadwal->tanggal)->format('d') }}</span>
                             </div>
                             <div class="flex-1">
@@ -154,7 +154,7 @@
                                     </span>
                                 </div>
                                 <p class="text-xs text-[#746B77] mt-2">
-                                    {{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('l, d F Y') }} · {{ $jadwal->jam_mulai }}-{{ $jadwal->jam_selesai }} WIB
+                                    {{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('l, d F Y') }} · {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }}–{{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }} WIB
                                 </p>
                             </div>
                         </div>
@@ -169,16 +169,21 @@
                         {{-- Footer --}}
                         <div class="flex items-center justify-between pt-2">
                             <span class="text-xs text-[#746B77]">60 menit · Rp150.000</span>
-                            @if($konsultasiMendatang->konsultasi)
-                                <a href="{{ route('konsultasi.chat', $konsultasiMendatang->konsultasi->id) }}" class="text-xs font-semibold text-[#643B62] hover:underline flex items-center space-x-1">
-                                    <span>Lihat detail sesi</span>
-                                    <span>&nearr;</span>
-                                </a>
-                            @else
-                                <a href="{{ route('pengguna.riwayat-konsultasi') }}" class="text-xs font-semibold text-[#643B62] hover:underline flex items-center space-x-1">
-                                    <span>Lihat detail sesi</span>
-                                    <span>&nearr;</span>
-                                </a>
+                            @if($konsultasiMendatang->status === 'terkonfirmasi' && $konsultasiMendatang->konsultasi)
+                                @php
+                                    $sesiKonsultasi = $konsultasiMendatang->konsultasi;
+                                    $isSesiAktif = $sesiKonsultasi->sesiAktif();
+                                @endphp
+                                @if($isSesiAktif)
+                                    <a href="{{ route('konsultasi.chat', $sesiKonsultasi->id) }}" class="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#643B62] hover:bg-[#3E293F] text-white rounded-xl text-xs font-semibold shadow-xs transition">
+                                        <span>Buka Chat</span>
+                                        <span>&rarr;</span>
+                                    </a>
+                                @else
+                                    <a href="{{ route('konsultasi.chat', $sesiKonsultasi->id) }}" class="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#EEE7F2] hover:bg-[#DCD5DD] text-[#746B77] hover:text-[#3E293F] border border-[#DCD5DD] rounded-xl text-xs font-semibold transition" title="Sesi belum dimulai">
+                                        <span>Belum dimulai</span>
+                                    </a>
+                                @endif
                             @endif
                         </div>
                     </div>

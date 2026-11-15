@@ -24,6 +24,7 @@ use App\Http\Controllers\Pengguna\KonsultasiController;
 use App\Http\Controllers\Konselor\JadwalKonsultasiController;
 use App\Http\Controllers\ChatKonsultasiController;
 use App\Http\Controllers\Konselor\BerandaKonselorController;
+use App\Http\Controllers\Konselor\RiwayatSesiController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -183,9 +184,7 @@ Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->na
     Route::get('/chat', function () {
         return redirect()->route('konselor.dashboard', ['modal' => 'chat']);
     })->name('chat');
-    Route::get('/riwayat', function () {
-        return redirect()->route('konselor.dashboard', ['tab' => 'riwayat']);
-    })->name('riwayat');
+    Route::get('/riwayat', [RiwayatSesiController::class, 'index'])->name('riwayat');
 });
 
 Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

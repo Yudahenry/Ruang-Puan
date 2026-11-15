@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('header-nav')
 @php
@@ -41,7 +41,7 @@
                class="px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 {{ request()->routeIs('konselor.booking') ? 'bg-white text-[#3E293F] font-medium shadow-xs' : 'text-[#746B77] hover:text-[#3E293F] hover:bg-white/60' }}">
                 Booking Masuk
             </a>
-            <a href="{{ route('konselor.chat') }}" 
+            <a href="{{ route('konselor.riwayat') }}" 
                class="px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 {{ request()->routeIs('konselor.chat') ? 'bg-white text-[#3E293F] font-medium shadow-xs' : 'text-[#746B77] hover:text-[#3E293F] hover:bg-white/60' }}">
                 Chat
             </a>
@@ -133,9 +133,22 @@
                     <div class="px-4 py-3 border-b border-[#DCD5DD]/60">
                         <p class="font-bold text-[#3E293F]">{{ $counselorName }}</p>
                         <p class="text-[#746B77] text-[11px] truncate">{{ $user->email ?? 'konselor@ruangpuan.test' }}</p>
-                        <span class="inline-block mt-1.5 px-2.5 py-0.5 bg-[#EEE7F2] text-[#643B62] rounded-full text-[10px] font-semibold">
-                            ✓ Konselor Terverifikasi
-                        </span>
+                        @php
+                            $navStatusVerif = $user->konselor->status_verifikasi ?? 'menunggu';
+                        @endphp
+                        @if($navStatusVerif === 'disetujui')
+                            <span class="inline-block mt-1.5 px-2.5 py-0.5 bg-[#EEE7F2] text-[#643B62] rounded-full text-[10px] font-semibold">
+                                ✓ Konselor Terverifikasi
+                            </span>
+                        @elseif($navStatusVerif === 'ditolak')
+                            <span class="inline-block mt-1.5 px-2.5 py-0.5 bg-rose-100 text-rose-700 rounded-full text-[10px] font-semibold">
+                                ✕ Verifikasi Ditolak
+                            </span>
+                        @else
+                            <span class="inline-block mt-1.5 px-2.5 py-0.5 bg-amber-100 text-amber-800 rounded-full text-[10px] font-semibold">
+                                ⏳ Menunggu Verifikasi
+                            </span>
+                        @endif
                     </div>
 
                     <div class="py-1">
@@ -184,7 +197,7 @@
         <a href="{{ route('konselor.booking') }}" class="block px-4 py-2.5 rounded-2xl text-xs font-medium text-[#746B77] hover:bg-[#FCFAF8]">
             Booking Masuk
         </a>
-        <a href="{{ route('konselor.chat') }}" class="block px-4 py-2.5 rounded-2xl text-xs font-medium text-[#746B77] hover:bg-[#FCFAF8]">
+        <a href="{{ route('konselor.riwayat') }}" class="block px-4 py-2.5 rounded-2xl text-xs font-medium text-[#746B77] hover:bg-[#FCFAF8]">
             Chat Konsultasi
         </a>
         <a href="{{ route('konselor.riwayat') }}" class="block px-4 py-2.5 rounded-2xl text-xs font-medium text-[#746B77] hover:bg-[#FCFAF8]">
