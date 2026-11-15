@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -30,9 +34,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// ==========================================
-// 1. AUTHENTICATION KHUSUS ADMIN
-// ==========================================
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
         Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
@@ -44,9 +45,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-// ==========================================
-// 2. AUTHENTICATION & EMAIL VERIFICATION
-// ==========================================
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
@@ -78,9 +76,6 @@ Route::middleware('auth')->group(function () {
         ->name('verification.send');
 });
 
-// ==========================================
-// 3. FITUR KONSULTASI (PENGGUNA)
-// ==========================================
 Route::middleware(['auth'])->prefix('konsultasi')->name('konsultasi.')->group(function () {
     Route::get('/', [KonsultasiController::class, 'index'])->name('index');
     Route::get('/pilih/{konselor}', [KonsultasiController::class, 'pilihJadwal'])->name('jadwal');
@@ -97,16 +92,10 @@ Route::middleware(['auth', 'verified'])->prefix('konsultasi')->name('konsultasi.
     Route::post('/{konsultasi}/chat/kirim', [ChatKonsultasiController::class, 'kirim'])->name('chat.kirim');
 });
 
-// ==========================================
-// 4. PUBLIC ROUTES
-// ==========================================
 Route::get('/edukasi', [EdukasiController::class, 'index'])->name('edukasi.index');
 Route::get('/edukasi/{id}', [EdukasiController::class, 'show'])->name('edukasi.show');
 Route::get('/direktori', [DirektoriController::class, 'index'])->name('direktori.index');
 
-// ==========================================
-// 5. PENGGUNA ROUTES (PELAPORAN)
-// ==========================================
 Route::middleware(['auth', 'role:pengguna'])->prefix('pelaporan')->name('pelaporan.')->group(function () {
     Route::get('/buat', [LaporanController::class, 'create'])->name('buat');
     Route::post('/', [LaporanController::class, 'store'])->name('store');
@@ -117,9 +106,6 @@ Route::middleware(['auth', 'role:pengguna'])->prefix('pelaporan')->name('pelapor
 
 Route::middleware(['auth'])->get('/pelaporan/lacak/{kode}', [LaporanController::class, 'lacak'])->name('pelaporan.lacak');
 
-// ==========================================
-// 6. ADMIN ROUTES (MANAJEMEN KONTEN & LAPORAN)
-// ==========================================
 Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/', [AdminLaporanController::class, 'index'])->name('index');
@@ -152,9 +138,6 @@ Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admi
 });
 Route::redirect('/verifikasi-konselor', '/admin/konselor');
 
-// ==========================================
-// 7. ROLE-BASED DASHBOARDS & REDIRECT
-// ==========================================
 Route::middleware(['auth', 'verified', 'role:pengguna'])->prefix('pengguna')->name('pengguna.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Pengguna\BerandaController::class, 'index'])->name('dashboard');
     Route::get('/riwayat-konsultasi', [\App\Http\Controllers\Pengguna\RiwayatKonsultasiController::class, 'index'])->name('riwayat-konsultasi');
@@ -209,3 +192,73 @@ Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
 Route::middleware(['auth', 'verified'])->get('/beranda', function () {
     return redirect()->route('pengguna.dashboard');
 })->name('beranda');
+
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->name('password.request');
+
+Route::post('/forgot-password', function (Request $request) {
+    $request->validate(['email' => 'required|email']);
+
+    $exists = DB::table('users')->where('email', $request->email)->exists();
+
+    if (!$exists && Schema::hasTable('admins') && Schema::hasColumn('admins', 'email')) {
+        $exists = DB::table('admins')->where('email', $request->email)->exists();
+    }
+
+    if (!$exists) {
+        return back()->withErrors(['email' => 'Email tidak terdaftar di sistem.']);
+    }
+
+    $token = Str::random(64);
+    
+    DB::table('password_reset_tokens')->updateOrInsert(
+        ['email' => $request->email],
+        ['token' => $token, 'created_at' => now()]
+    );
+
+    $resetUrl = url('/reset-password/' . $token . '?email=' . urlencode($request->email));
+
+    return back()->with([
+        'status' => 'Email terverifikasi! Klik tautan di bawah untuk mengatur ulang kata sandi:',
+        'reset_url' => $resetUrl
+    ]);
+})->name('password.email');
+
+Route::get('/reset-password/{token}', function (Request $request, $token) {
+    return view('auth.reset-password', [
+        'token' => $token,
+        'email' => $request->query('email')
+    ]);
+})->name('password.reset');
+
+Route::post('/reset-password', function (Request $request) {
+    $request->validate([
+        'token' => 'required',
+        'email' => 'required|email',
+        'password' => 'required|min:6|confirmed',
+    ]);
+
+    $record = DB::table('password_reset_tokens')
+        ->where('email', $request->email)
+        ->where('token', $request->token)
+        ->first();
+
+    if (!$record) {
+        return back()->withErrors(['email' => 'Token reset kata sandi tidak valid atau sudah kedaluwarsa.']);
+    }
+
+    if (DB::table('users')->where('email', $request->email)->exists()) {
+        DB::table('users')->where('email', $request->email)->update([
+            'password' => Hash::make($request->password)
+        ]);
+    } elseif (Schema::hasTable('admins') && Schema::hasColumn('admins', 'email')) {
+        DB::table('admins')->where('email', $request->email)->update([
+            'password' => Hash::make($request->password)
+        ]);
+    }
+
+    DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+    return redirect()->route('login')->with('status', 'Kata sandi berhasil diubah! Silakan login dengan sandi baru.');
+})->name('password.update');
