@@ -133,8 +133,17 @@
     @php
         $keuanganPerBulan = [];
         for ($m = 1; $m <= 12; $m++) {
-            if (class_exists('\App\Models\Konsultasi')) {
-                $totalSesi = \App\Models\Konsultasi::whereMonth('created_at', $m)->whereYear('created_at', date('Y'))->sum('harga');
+            if (class_exists('\App\Models\Pembayaran')) {
+                $totalSesi = \App\Models\Pembayaran::whereMonth('created_at', $m)
+                    ->whereYear('created_at', date('Y'))
+                    ->where('status', 'berhasil')
+                    ->sum('jumlah');
+                $keuanganPerBulan[] = $totalSesi * 0.15;
+            } elseif (class_exists('\App\Models\Pemesanan')) {
+                $totalSesi = \App\Models\Pemesanan::whereMonth('created_at', $m)
+                    ->whereYear('created_at', date('Y'))
+                    ->whereIn('status', ['lunas', 'terkonfirmasi'])
+                    ->sum('total_biaya');
                 $keuanganPerBulan[] = $totalSesi * 0.15;
             } else {
                 $keuanganPerBulan[] = 0;
