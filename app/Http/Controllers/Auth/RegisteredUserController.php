@@ -8,7 +8,9 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -26,7 +28,7 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:150', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'alias' => ['nullable', 'string', 'max:100'],
-            'role' => ['required', 'in:pengguna,konselor'],
+            'role' => ['required', 'in:pengguna,konselor,admin'],
         ]);
 
         $user = User::create([
@@ -38,7 +40,6 @@ class RegisteredUserController extends Controller
             'status' => 'aktif',
         ]);
 
-        // Jika mendaftar sebagai konselor
         if ($request->role === 'konselor') {
             \App\Models\Konselor::create([
                 'user_id' => $user->id,
@@ -46,14 +47,34 @@ class RegisteredUserController extends Controller
             ]);
         }
 
-        // Kirim email verifikasi (FR-01: akun aktif setelah email diverifikasi)
-        // Otomatis verifikasi untuk environment lokal agar langsung bisa masuk
+        if ($request->role === 'admin' && Schema::hasTable('admins')) {
+            $adminData = [
+                'user_id' => $user->id,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            if (Schema::hasColumn('admins', 'nama')) {
+                $adminData['nama'] = $request->nama;
+            } elseif (Schema::hasColumn('admins', 'name')) {
+                $adminData['name'] = $request->nama;
+            }
+
+            DB::table('admins')->updateOrInsert(['email' => $request->email], $adminData);
+        }
+
         $user->forceFill(['email_verified_at' => now()])->save();
         
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect()->route('verification.notice');
+        if ($request->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('dashboard');
     }
 }

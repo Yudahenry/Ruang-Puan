@@ -161,7 +161,7 @@
                         <input type="checkbox" name="remember" class="rounded border-[#DCD5DD] text-[#643B62] focus:ring-[#643B62] w-4 h-4">
                         <span class="text-xs text-[#746B77]">Ingat saya</span>
                     </label>
-                    <a href="#" class="text-xs font-bold text-[#3E293F] hover:underline">Lupa kata sandi?</a>
+                    <a href="{{ route('password.request') }}" class="text-xs font-bold text-[#3E293F] hover:underline">Lupa kata sandi?</a>
                 </div>
 
                 <button type="submit" :disabled="loading"
