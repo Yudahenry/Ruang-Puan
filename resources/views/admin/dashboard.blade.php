@@ -14,7 +14,7 @@
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500 font-medium">Total Laporan</p>
-                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ \App\Models\Laporan::count() }}</h3>
+                <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ class_exists('\App\Models\Laporan') ? \App\Models\Laporan::count() : 0 }}</h3>
             </div>
             <div class="p-3 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center">
                 <svg style="width: 24px; height: 24px; min-width: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
@@ -61,6 +61,7 @@
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
         <h3 class="text-md font-semibold text-gray-800 mb-4">Akses Cepat Pengelolaan</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            @if (Route::has('admin.laporan.index'))
             <a href="{{ route('admin.laporan.index') }}" class="p-4 border rounded-lg hover:bg-gray-50 transition flex items-center space-x-3">
                 <span class="p-2 bg-indigo-100 text-indigo-700 rounded-md font-bold">📋</span>
                 <div>
@@ -68,6 +69,8 @@
                     <p class="text-xs text-gray-500">Periksa dan ubah status laporan masuk</p>
                 </div>
             </a>
+            @endif
+            @if (Route::has('admin.konselor.index'))
             <a href="{{ route('admin.konselor.index') }}" class="p-4 border rounded-lg hover:bg-gray-50 transition flex items-center space-x-3">
                 <span class="p-2 bg-purple-100 text-purple-700 rounded-md font-bold">👩‍⚕️</span>
                 <div>
@@ -75,6 +78,8 @@
                     <p class="text-xs text-gray-500">Kelola persetujuan akun konselor</p>
                 </div>
             </a>
+            @endif
+            @if (Route::has('admin.edukasi.index'))
             <a href="{{ route('admin.edukasi.index') }}" class="p-4 border rounded-lg hover:bg-gray-50 transition flex items-center space-x-3">
                 <span class="p-2 bg-blue-100 text-blue-700 rounded-md font-bold">📚</span>
                 <div>
@@ -82,6 +87,7 @@
                     <p class="text-xs text-gray-500">Tambah materi atau artikel edukasi</p>
                 </div>
             </a>
+            @endif
         </div>
     </div>
 
@@ -143,8 +149,9 @@
 
         $keuanganPerBulan = [];
         for ($m = 1; $m <= 12; $m++) {
-            if (class_exists('\App\Models\Konsultasi') && $kolomNominal) {
-                $totalSesi = \App\Models\Konsultasi::whereMonth('created_at', $m)->whereYear('created_at', date('Y'))->sum($kolomNominal);
+            if (class_exists('\App\Models\Pemesanan')) {
+                // Diambil dari tabel pemesanan menggunakan total_biaya agar aman dari error kolom
+                $totalSesi = \App\Models\Pemesanan::whereMonth('created_at', $m)->whereYear('created_at', date('Y'))->sum('total_biaya');
                 $keuanganPerBulan[] = $totalSesi * 0.15;
             } else {
                 $keuanganPerBulan[] = 0;
@@ -153,7 +160,7 @@
 
         $laporanPerBulan = [];
         for ($m = 1; $m <= 12; $m++) {
-            $laporanPerBulan[] = \App\Models\Laporan::whereMonth('created_at', $m)->whereYear('created_at', date('Y'))->count();
+            $laporanPerBulan[] = class_exists('\App\Models\Laporan') ? \App\Models\Laporan::whereMonth('created_at', $m)->whereYear('created_at', date('Y'))->count() : 0;
         }
     @endphp
 

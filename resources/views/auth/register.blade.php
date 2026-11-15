@@ -153,7 +153,6 @@
                             class="w-full rounded-lg border border-[#e3dbe7] bg-white px-3.5 py-3 text-xs text-[#3b2a44] focus:border-[#6b3b63] focus:ring-1 focus:ring-[#6b3b63] focus:outline-none transition">
                         <option value="pengguna">Pengguna / Pelapor</option>
                         <option value="konselor">Konselor / Psikolog</option>
-                        <option value="admin">Administrator</option>
                     </select>
                 </div>
 

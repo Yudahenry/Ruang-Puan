@@ -168,7 +168,10 @@
 
                         {{-- Footer --}}
                         <div class="flex items-center justify-between pt-2">
-                            <span class="text-xs text-[#746B77]">60 menit · Rp150.000</span>
+                            {{-- Perbaikan Tarif Dinamis di sini --}}
+                            <span class="text-xs text-[#746B77]">
+                                {{ $konsultasiMendatang->durasi ?? 60 }} menit · Rp {{ number_format($konsultasiMendatang->total_biaya ?? 0, 0, ',', '.') }}
+                            </span>
                             @if($konsultasiMendatang->status === 'terkonfirmasi' && $konsultasiMendatang->konsultasi)
                                 @php
                                     $sesiKonsultasi = $konsultasiMendatang->konsultasi;

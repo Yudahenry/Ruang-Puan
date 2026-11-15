@@ -2,13 +2,19 @@
 
 @section('pengguna-content')
 @php
-    $daftar = $konsultasis ?? collect();
+    // Menggunakan $pemesanans agar semua booking yang sudah dibuat langsung tampil
+    $daftar = $pemesanans ?? collect();
 
     $warnaStatus = [
-        'terjadwal'   => 'bg-sky-100 text-sky-800 border-sky-200',
-        'berlangsung' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
-        'selesai'     => 'bg-[#EEE7F2] text-[#3E293F] border-[#DCD5DD]',
-        'batal'       => 'bg-rose-100 text-rose-800 border-rose-200',
+        'menunggu_pembayaran' => 'bg-amber-100 text-amber-800 border-amber-200',
+        'menunggu_konfirmasi' => 'bg-amber-100 text-amber-800 border-amber-200',
+        'pending'             => 'bg-amber-100 text-amber-800 border-amber-200',
+        'terkonfirmasi'       => 'bg-sky-100 text-sky-800 border-sky-200',
+        'terjadwal'           => 'bg-sky-100 text-sky-800 border-sky-200',
+        'berlangsung'         => 'bg-emerald-100 text-emerald-800 border-emerald-200',
+        'selesai'             => 'bg-[#EEE7F2] text-[#3E293F] border-[#DCD5DD]',
+        'batal'               => 'bg-rose-100 text-rose-800 border-rose-200',
+        'ditolak'             => 'bg-rose-100 text-rose-800 border-rose-200',
     ];
     $labelBayar = ['menunggu' => 'Menunggu', 'berhasil' => 'Berhasil', 'gagal' => 'Gagal'];
 @endphp
@@ -36,18 +42,18 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-[#EEE7F2]/50 border border-[#DCD5DD] rounded-2xl p-5 shadow-2xs">
             <p class="text-xs text-[#746B77]">Total Konsultasi</p>
-            <p class="text-2xl font-bold font-serif text-[#3E293F] mt-1">{{ $daftar->count() }}</p>
+            <p class="text-2xl font-bold font-serif text-[#3E293F] mt-1">{{ $totalKonsultasi ?? $daftar->count() }}</p>
         </div>
         <div class="bg-[#EEE7F2]/50 border border-[#DCD5DD] rounded-2xl p-5 shadow-2xs">
             <p class="text-xs text-[#746B77]">Akan Datang</p>
             <p class="text-2xl font-bold font-serif text-[#3E293F] mt-1">
-                {{ $daftar->filter(fn ($k) => in_array($k->status_efektif, ['terjadwal', 'berlangsung']))->count() }}
+                {{ $akanDatang ?? 0 }}
             </p>
         </div>
         <div class="bg-[#EEE7F2]/50 border border-[#DCD5DD] rounded-2xl p-5 shadow-2xs">
             <p class="text-xs text-[#746B77]">Selesai</p>
             <p class="text-2xl font-bold font-serif text-[#3E293F] mt-1">
-                {{ $daftar->filter(fn ($k) => $k->status_efektif === 'selesai')->count() }}
+                {{ $selesai ?? 0 }}
             </p>
         </div>
     </div>
@@ -67,15 +73,31 @@
         </div>
     @else
         <div class="space-y-4">
-            @foreach ($daftar as $k)
+            @foreach ($daftar as $p)
                 @php
-                    $status   = $k->status_efektif;
-                    $badge    = $warnaStatus[$status] ?? 'bg-gray-100 text-gray-700 border-gray-200';
-                    $jadwal   = $k->pemesanan?->jadwalKonsultasi;
-                    $kUser    = $jadwal?->konselor?->user;
-                    $nama     = $kUser->nama ?? $kUser->name ?? 'Konselor';
-                    $bayar    = $k->pemesanan?->pembayaran?->status;
-                    $bisaChat = $status !== 'batal' && $k->pemesanan?->status === 'terkonfirmasi';
+                    $jadwal     = $p->jadwalKonsultasi;
+                    
+                    // Tentukan apakah waktu konsultasi sudah lewat atau belum
+                    $waktuSelesai = $jadwal ? \Carbon\Carbon::parse($jadwal->tanggal . ' ' . $jadwal->jam_selesai) : null;
+                    $sudahLewat   = $waktuSelesai ? $waktuSelesai->isPast() : false;
+
+                    $statusRaw  = strtolower($p->konsultasi?->status_efektif ?? $p->status ?? 'menunggu');
+
+                    // Jika jadwal sudah lewat dan belum dibatalkan, otomatis jadikan status badge 'selesai'
+                    if ($sudahLewat && !in_array($statusRaw, ['batal', 'ditolak'])) {
+                        $statusRaw = 'selesai';
+                    }
+
+                    $badge      = $warnaStatus[$statusRaw] ?? 'bg-gray-100 text-gray-700 border-gray-200';
+                    $labelSts   = ucwords(str_replace('_', ' ', $statusRaw));
+
+                    $kUser      = $jadwal?->konselor?->user;
+                    $nama       = $kUser->nama ?? $kUser->name ?? 'Konselor';
+
+                    $bayar      = $p->pembayaran?->status ?? $p->status_pembayaran;
+                    $noInvoice  = $p->pembayaran?->no_invoice ?? ('INV-' . str_pad($p->id, 5, '0', STR_PAD_LEFT));
+                    $bisaChat   = $p->konsultasi && !in_array($statusRaw, ['batal', 'ditolak']) && $p->status === 'terkonfirmasi';
+                    $belumBayar = in_array(strtolower($bayar ?? ''), ['menunggu', 'belum_bayar', 'pending', '']);
                 @endphp
 
                 <div class="bg-white border border-[#DCD5DD] rounded-3xl shadow-sm hover:shadow-md transition p-5 sm:p-6">
@@ -98,9 +120,10 @@
                                 </p>
                                 <p class="text-xs text-[#746B77] mt-1">
                                     Pembayaran:
-                                    <span class="font-semibold text-[#3E293F]">{{ $bayar ? ($labelBayar[$bayar] ?? ucfirst($bayar)) : 'Belum dibayar' }}</span>
-                                    @if ($k->pemesanan?->pembayaran)
-                                        &middot; {{ $k->pemesanan->pembayaran->no_invoice }}
+                                    <span class="font-semibold text-[#3E293F]">{{ $bayar ? ($labelBayar[strtolower($bayar)] ?? ucfirst($bayar)) : 'Belum dibayar' }}</span>
+                                    &middot; <span class="font-medium text-[#643B62]">{{ $noInvoice }}</span>
+                                    @if ($p->total_biaya)
+                                        &middot; <span class="font-semibold text-[#3E293F]">Rp {{ number_format($p->total_biaya, 0, ',', '.') }}</span>
                                     @endif
                                 </p>
                             </div>
@@ -108,16 +131,33 @@
 
                         <div class="flex sm:flex-col items-center sm:items-end justify-between gap-3">
                             <span class="inline-flex px-3 py-1 rounded-full border text-[11px] font-semibold {{ $badge }}">
-                                {{ ucfirst($status) }}
+                                {{ $labelSts }}
                             </span>
 
-                            @if ($bisaChat)
-                                <a href="{{ route('konsultasi.chat', $k->id) }}"
-                                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-[#643B62] hover:bg-[#3E293F] text-white rounded-2xl text-xs font-semibold shadow-sm transition group">
-                                    <span>💬 {{ $status === 'selesai' ? 'Lihat Percakapan' : 'Buka Chat' }}</span>
-                                    <span class="transform group-hover:translate-x-1 transition">&rarr;</span>
+                            <div class="flex flex-wrap items-center justify-end gap-2">
+                                {{-- Menu / Tombol Invoice di dalam setiap booking --}}
+                                <a href="{{ route('pengguna.riwayat-konsultasi.invoice', $p->id) }}"
+                                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#EEE7F2] hover:bg-[#DCD5DD] text-[#3E293F] border border-[#DCD5DD] rounded-2xl text-xs font-semibold transition">
+                                    <span>🧾 Invoice</span>
                                 </a>
-                            @endif
+
+                                {{-- Tombol Bayar jika masih menunggu pembayaran --}}
+                                @if ($belumBayar && !in_array($statusRaw, ['batal', 'ditolak']))
+                                    <a href="{{ route('konsultasi.tagihan', $p->id) }}"
+                                       class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-xs font-semibold shadow-sm transition">
+                                        <span>Bayar</span>
+                                    </a>
+                                @endif
+
+                                {{-- Tombol Chat bawaan jika sesi sudah terkonfirmasi --}}
+                                @if ($bisaChat)
+                                    <a href="{{ route('konsultasi.chat', $p->konsultasi->id) }}"
+                                       class="inline-flex items-center gap-2 px-4 py-2 bg-[#643B62] hover:bg-[#3E293F] text-white rounded-2xl text-xs font-semibold shadow-sm transition group">
+                                        <span>💬 {{ $statusRaw === 'selesai' ? 'Lihat Percakapan' : 'Buka Chat' }}</span>
+                                        <span class="transform group-hover:translate-x-1 transition">&rarr;</span>
+                                    </a>
+                                @endif
+                            </div>
                         </div>
 
                     </div>
