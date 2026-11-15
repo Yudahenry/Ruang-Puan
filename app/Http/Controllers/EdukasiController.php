@@ -13,7 +13,7 @@ class EdukasiController extends Controller
         $kategoriId = $request->get('kategori');
         $search = $request->get('search');
 
-        $kategoris = KategoriEdukasi::withCount('materiEdukasis')->get();
+                $kategoris = KategoriEdukasi::withCount(['materiEdukasis' => fn ($q) => $q->where('status', 'terbit')])->get();
 
         $query = MateriEdukasi::with(['kategoriEdukasi', 'admin.user'])
             ->where('status', 'terbit')
