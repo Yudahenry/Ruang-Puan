@@ -11,12 +11,12 @@
             <span class="text-[#746B77]">·</span>
             <span class="text-[#746B77] uppercase tracking-wider font-bold text-[10px]">{{ $materi->jenis_konten }}</span>
         </div>
-        <h1 class="text-3xl sm:text-4xl font-serif font-bold text-[#3E293F] tracking-tight leading-snug">{{ $materi->judul }}</h1>
+        <h1 style="overflow-wrap: anywhere;" class="text-3xl sm:text-4xl font-serif font-bold text-[#3E293F] tracking-tight leading-snug">{{ $materi->judul }}</h1>
         <p class="text-xs text-[#746B77] mt-2">Diposting pada {{ $materi->tanggal_posting ? \Carbon\Carbon::parse($materi->tanggal_posting)->format('d M Y') : $materi->created_at->format('d M Y') }}</p>
     </div>
 
     <div class="bg-white rounded-3xl shadow-sm border border-[#DCD5DD] p-8 sm:p-10 mb-12">
-        <div class="prose max-w-none text-[#3E293F] leading-relaxed space-y-4 text-sm sm:text-base font-normal">
+        <div style="overflow-wrap: anywhere;" class="prose max-w-none text-[#3E293F] leading-relaxed space-y-4 text-sm sm:text-base font-normal">
             {!! nl2br(e($materi->isi)) !!}
         </div>
     </div>

@@ -82,8 +82,8 @@
             <!-- Featured Article -->
             @if($featured)
                 <div class="max-w-7xl mx-auto">
-                    <div class="group bg-white rounded-3xl shadow-sm border border-[#DCD5DD] overflow-hidden grid grid-cols-1 lg:grid-cols-12 hover:shadow-md transition-all duration-300">
-                        <div class="lg:col-span-7 relative bg-[#EEE7F2] min-h-[280px] lg:min-h-[380px] overflow-hidden">
+                    <div class="group bg-white rounded-3xl shadow-sm border border-[#DCD5DD] overflow-hidden grid grid-cols-1 lg:grid-cols-12 lg:h-[300px] hover:shadow-md transition-all duration-300">
+                        <div class="lg:col-span-5 relative bg-[#EEE7F2] h-[240px] lg:h-full overflow-hidden">
                             <img src="{{ $featured->file_url ?? $fallbackImages[0] }}" 
                                  alt="{{ $featured->judul }}" 
                                  class="w-full h-full object-cover group-hover:scale-105 transition duration-700"
@@ -94,7 +94,7 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="lg:col-span-5 p-8 sm:p-10 flex flex-col justify-between">
+                        <div class="lg:col-span-7 p-6 flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center gap-3 text-xs text-[#746B77] mb-3">
                                     <span class="font-bold uppercase tracking-wider text-[#643B62] bg-[#EEE7F2] px-3 py-1 rounded-md text-[10px]">
@@ -102,10 +102,10 @@
                                     </span>
                                     <span>{{ $featured->tanggal_posting ? \Carbon\Carbon::parse($featured->tanggal_posting)->format('d M Y') : $featured->created_at->format('d M Y') }}</span>
                                 </div>
-                                <h2 class="text-xl sm:text-2xl font-serif font-bold text-[#3E293F] mb-3 leading-snug group-hover:text-[#643B62] transition">
+                                <h2 class="text-xl sm:text-2xl font-serif font-bold text-[#3E293F] mb-3 leading-snug break-words group-hover:text-[#643B62] transition">
                                     <a href="{{ route('edukasi.show', $featured->id) }}">{{ $featured->judul }}</a>
                                 </h2>
-                                <p class="text-xs sm:text-sm text-[#746B77] line-clamp-3 leading-relaxed mb-6">
+                                <p class="text-xs sm:text-sm text-[#746B77] line-clamp-2 leading-relaxed break-words mb-4">
                                     {{ Str::limit(strip_tags($featured->isi), 160) }}
                                 </p>
                             </div>
