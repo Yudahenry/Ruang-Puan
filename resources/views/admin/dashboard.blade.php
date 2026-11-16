@@ -149,24 +149,22 @@
 
         $keuanganPerBulan = [];
         for ($m = 1; $m <= 12; $m++) {
-<<<<<<< HEAD
+            $totalSesi = 0;
             if (class_exists('\App\Models\Pembayaran') && \Illuminate\Support\Facades\Schema::hasTable('pembayarans')) {
                 $totalSesi = \App\Models\Pembayaran::whereMonth('created_at', $m)
                     ->whereYear('created_at', date('Y'))
                     ->where('status', 'berhasil')
                     ->sum('jumlah');
-                $keuanganPerBulan[] = $totalSesi * 0.15;
+            } elseif (class_exists('\App\Models\Pemesanan') && \Illuminate\Support\Facades\Schema::hasTable('pemesanans')) {
+                $totalSesi = \App\Models\Pemesanan::whereMonth('created_at', $m)
+                    ->whereYear('created_at', date('Y'))
+                    ->sum('total_biaya');
             } elseif (class_exists('\App\Models\Konsultasi') && $kolomNominal) {
-                $totalSesi = \App\Models\Konsultasi::whereMonth('created_at', $m)->whereYear('created_at', date('Y'))->sum($kolomNominal);
-=======
-            if (class_exists('\App\Models\Pemesanan')) {
-                // Diambil dari tabel pemesanan menggunakan total_biaya agar aman dari error kolom
-                $totalSesi = \App\Models\Pemesanan::whereMonth('created_at', $m)->whereYear('created_at', date('Y'))->sum('total_biaya');
->>>>>>> 73cb7f0bece8091caceca584fc7e8c07998b5ac7
-                $keuanganPerBulan[] = $totalSesi * 0.15;
-            } else {
-                $keuanganPerBulan[] = 0;
+                $totalSesi = \App\Models\Konsultasi::whereMonth('created_at', $m)
+                    ->whereYear('created_at', date('Y'))
+                    ->sum($kolomNominal);
             }
+            $keuanganPerBulan[] = $totalSesi * 0.15;
         }
 
         $laporanPerBulan = [];
