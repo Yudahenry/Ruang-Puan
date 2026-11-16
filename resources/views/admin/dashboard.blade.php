@@ -5,7 +5,7 @@
     <!-- Header Sambutan -->
     <div class="mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Dashboard Admin</h2>
-        <p class="text-sm text-gray-600">Selamat datang kembali, {{ auth()->user()->name ?? 'Admin' }}. Pantau statistik dan operasional layanan Ruang Puan di sini.</p>
+        <p class="text-sm text-gray-600">Selamat datang kembali, {{ auth()->user()->nama ?? auth()->user()->name ?? 'Admin' }}. Pantau statistik dan operasional layanan Ruang Puan di sini.</p>
     </div>
 
     <!-- Kotak Statistik (Cards) -->
@@ -131,19 +131,26 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     @php
+        $kolomNominal = null;
+        if (\Illuminate\Support\Facades\Schema::hasTable('konsultasis')) {
+            foreach (['harga', 'biaya', 'tarif', 'total_harga', 'total_biaya', 'nominal'] as $kolom) {
+                if (\Illuminate\Support\Facades\Schema::hasColumn('konsultasis', $kolom)) {
+                    $kolomNominal = $kolom;
+                    break;
+                }
+            }
+        }
+
         $keuanganPerBulan = [];
         for ($m = 1; $m <= 12; $m++) {
-            if (class_exists('\App\Models\Pembayaran')) {
+            if (class_exists('\App\Models\Pembayaran') && \Illuminate\Support\Facades\Schema::hasTable('pembayarans')) {
                 $totalSesi = \App\Models\Pembayaran::whereMonth('created_at', $m)
                     ->whereYear('created_at', date('Y'))
                     ->where('status', 'berhasil')
                     ->sum('jumlah');
                 $keuanganPerBulan[] = $totalSesi * 0.15;
-            } elseif (class_exists('\App\Models\Pemesanan')) {
-                $totalSesi = \App\Models\Pemesanan::whereMonth('created_at', $m)
-                    ->whereYear('created_at', date('Y'))
-                    ->whereIn('status', ['lunas', 'terkonfirmasi'])
-                    ->sum('total_biaya');
+            } elseif (class_exists('\App\Models\Konsultasi') && $kolomNominal) {
+                $totalSesi = \App\Models\Konsultasi::whereMonth('created_at', $m)->whereYear('created_at', date('Y'))->sum($kolomNominal);
                 $keuanganPerBulan[] = $totalSesi * 0.15;
             } else {
                 $keuanganPerBulan[] = 0;
