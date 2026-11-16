@@ -8,8 +8,6 @@ use App\Models\Konselor;
 use App\Models\JadwalKonsultasi;
 use App\Models\Pemesanan;
 use App\Models\Konsultasi;
-use App\Models\Pesan;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,7 +30,7 @@ class BerandaKonselorController extends Controller
             );
         }
 
-        // Tentukan nama sapaan & gelar
+        // Tentukan nama sapaan & gelar secara dinamis dari user login
         $greetingName = 'Bu Dewi';
         $counselorTitle = 'Dewi L., M.Psi.';
         $counselorInitials = 'DL';
@@ -46,135 +44,169 @@ class BerandaKonselorController extends Controller
             }
         }
 
-        // 1. Data Ringkasan Metrik (4 Kartu Atas)
         $today = Carbon::today();
-        
-        $realSesiHariIni = JadwalKonsultasi::where('konselor_id', $konselor->id)
-            ->whereDate('tanggal', $today)
-            ->where('status', 'terpesan')
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
+        // ==========================================
+        // 1. DATA STATISTIK KARTU (100% DARI DATABASE)
+        // ==========================================
+        $sesiHariIniCount = Pemesanan::whereHas('jadwal', function ($q) use ($konselor, $today) {
+                $q->where('konselor_id', $konselor->id)->whereDate('tanggal', $today);
+            })
+            ->whereIn('pemesanans.status', ['lunas', 'terkonfirmasi', 'selesai'])
             ->count();
 
-        $realBookingMenunggu = Pemesanan::whereHas('jadwal', function ($q) use ($konselor) {
-            $q->where('konselor_id', $konselor->id);
-        })->where('status', 'menunggu_pembayaran')->count();
+        $bookingMenungguCount = Pemesanan::whereHas('jadwal', function ($q) use ($konselor) {
+                $q->where('konselor_id', $konselor->id);
+            })
+            ->whereIn('pemesanans.status', ['pending', 'menunggu_pembayaran'])
+            ->count();
 
-        $realSesiSelesaiBulanIni = Konsultasi::whereHas('pemesanan.jadwal', function ($q) use ($konselor) {
-            $q->where('konselor_id', $konselor->id);
-        })->whereMonth('tanggal_konsultasi', Carbon::now()->month)
-          ->where('status', 'selesai')->count();
+        $sesiSelesaiBulanIni = Pemesanan::whereHas('jadwal', function ($q) use ($konselor) {
+                $q->where('konselor_id', $konselor->id);
+            })
+            ->whereMonth('pemesanans.created_at', $currentMonth)
+            ->whereYear('pemesanans.created_at', $currentYear)
+            ->where('pemesanans.status', 'selesai')
+            ->count();
 
-        $realTotalSesi = Konsultasi::whereHas('pemesanan.jadwal', function ($q) use ($konselor) {
-            $q->where('konselor_id', $konselor->id);
-        })->count();
+        $totalSesi = Pemesanan::whereHas('jadwal', function ($q) use ($konselor) {
+                $q->where('konselor_id', $konselor->id);
+            })
+            ->whereIn('pemesanans.status', ['selesai', 'terkonfirmasi', 'lunas'])
+            ->count();
 
         $stats = [
-            'sesi_hari_ini' => $realSesiHariIni > 0 ? $realSesiHariIni : 2,
-            'booking_menunggu' => $realBookingMenunggu > 0 ? $realBookingMenunggu : 3,
-            'sesi_selesai_bulan_ini' => $realSesiSelesaiBulanIni > 0 ? $realSesiSelesaiBulanIni : 18,
-            'total_sesi' => $realTotalSesi > 0 ? $realTotalSesi : 64,
+            'sesi_hari_ini' => $sesiHariIniCount,
+            'booking_menunggu' => $bookingMenungguCount,
+            'sesi_selesai_bulan_ini' => $sesiSelesaiBulanIni,
+            'total_sesi' => $totalSesi,
         ];
 
-        // 2. Data Sesi Berikutnya
-        $sesiBerikutnya = [
-            'klien' => 'yudahenry',
-            'avatar_initial' => 'Y',
-            'hari_tanggal' => 'Jumat, 23 Oktober 2026',
-            'tanggal_badge' => [
-                'bulan' => 'OKT',
-                'hari' => '23',
-            ],
-            'waktu' => '15.00–16.00 WIB',
-            'durasi' => '60 menit',
-            'metode' => 'Sesi melalui chat',
-            'status_pembayaran' => 'Pembayaran dikonfirmasi',
-            'topik' => 'Konsultasi lanjutan: Manajemen stres, regulasi emosi & pemulihan burnout.',
-            'catatan' => 'Klien telah menyelesaikan sesi asesmen awal pada 16 Oktober dan menjadwalkan sesi follow-up.',
-        ];
+        // ==========================================
+        // 2. DATA SESI BERIKUTNYA (NEXT SESSION)
+        // ==========================================
+        $nextSesi = Pemesanan::with(['user', 'jadwal', 'konsultasi'])
+            ->whereHas('jadwal', function ($q) use ($konselor, $today) {
+                $q->where('konselor_id', $konselor->id)->whereDate('tanggal', '>=', $today);
+            })
+            ->whereIn('pemesanans.status', ['lunas', 'terkonfirmasi'])
+            ->join('jadwal_konsultasis', 'pemesanans.jadwal_id', '=', 'jadwal_konsultasis.id')
+            ->orderBy('jadwal_konsultasis.tanggal', 'asc')
+            ->orderBy('jadwal_konsultasis.jam_mulai', 'asc')
+            ->select('pemesanans.*')
+            ->first();
 
-        // 3. Data Jadwal Hari Ini
-        $jadwalHariIni = [
-            [
-                'id' => 1,
-                'jam' => '15.00–16.00',
-                'durasi' => 'WIB · 60 menit',
-                'klien' => 'yudahenry',
-                'layanan' => 'Konsultasi melalui chat',
-                'status' => 'Berikutnya',
-                'is_next' => true,
-            ],
-            [
-                'id' => 2,
-                'jam' => '17.00–18.00',
-                'durasi' => 'WIB · 60 menit',
-                'klien' => 'ruangsenja',
-                'layanan' => 'Konsultasi melalui chat',
-                'status' => 'Terjadwal',
-                'is_next' => false,
-            ],
-        ];
+        // ==========================================
+        // 3. DATA JADWAL HARI INI
+        // ==========================================
+        $jadwalHariIniList = Pemesanan::with(['user', 'jadwal', 'konsultasi'])
+            ->whereHas('jadwal', function ($q) use ($konselor, $today) {
+                $q->where('konselor_id', $konselor->id)->whereDate('tanggal', $today);
+            })
+            ->whereIn('pemesanans.status', ['lunas', 'terkonfirmasi', 'selesai'])
+            ->join('jadwal_konsultasis', 'pemesanans.jadwal_id', '=', 'jadwal_konsultasis.id')
+            ->orderBy('jadwal_konsultasis.jam_mulai', 'asc')
+            ->select('pemesanans.*')
+            ->get();
 
-        // 4. Data Booking Menunggu
-        $bookingMenunggu = [
-            [
-                'id' => 1,
-                'klien' => 'bungapagi',
-                'diajukan' => 'Diajukan 20 menit lalu',
-                'jadwal' => 'Sabtu, 24 Okt · 10.00–11.00 WIB',
+        // ==========================================
+        // 4. DATA BOOKING MENUNGGU (SIDEBAR)
+        // ==========================================
+        $bookingMenungguList = Pemesanan::with(['user', 'jadwal'])
+            ->whereHas('jadwal', function ($q) use ($konselor) {
+                $q->where('konselor_id', $konselor->id);
+            })
+            ->whereIn('pemesanans.status', ['pending', 'menunggu_pembayaran'])
+            ->latest()
+            ->take(3)
+            ->get();
+
+        $bookingMenunggu = $bookingMenungguList->map(function ($item) {
+            $tgl = $item->jadwal ? Carbon::parse($item->jadwal->tanggal)->translatedFormat('l, d M') : '-';
+            $jamMulai = $item->jadwal ? substr($item->jadwal->jam_mulai, 0, 5) : '';
+            $jamSelesai = $item->jadwal ? substr($item->jadwal->jam_selesai, 0, 5) : '';
+            
+            return [
+                'id' => $item->id,
+                'klien' => $item->user->nama ?? $item->user->name ?? 'Klien',
+                'diajukan' => $item->created_at ? $item->created_at->diffForHumans() : '-',
+                'jadwal' => $tgl . ' · ' . $jamMulai . '–' . $jamSelesai . ' WIB',
                 'layanan' => 'Chat · 60 menit',
-                'keluhan' => 'Kecemasan menghadapi lingkungan kantor baru dan kendala komunikasi asertif.',
-                'tarif' => 'Rp 150.000',
-            ],
-            [
-                'id' => 2,
-                'klien' => 'langitcerah',
-                'diajukan' => 'Diajukan 1 jam lalu',
-                'jadwal' => 'Sabtu, 24 Okt · 13.00–14.00 WIB',
-                'layanan' => 'Chat · 60 menit',
-                'keluhan' => 'Pendampingan pemulihan trauma kekerasan emosional dan pembentukan healthy boundaries.',
-                'tarif' => 'Rp 150.000',
-            ],
-            [
-                'id' => 3,
-                'klien' => 'langkahkecil',
-                'diajukan' => 'Diajukan 2 jam lalu',
-                'jadwal' => 'Minggu, 25 Okt · 09.00–10.00 WIB',
-                'layanan' => 'Chat · 60 menit',
-                'keluhan' => 'Manajemen stres pasca peristiwa keluarga dan kebutuhan konseling aman perempuan.',
-                'tarif' => 'Rp 150.000',
-            ],
-        ];
+                'keluhan' => 'Permintaan sesi konsultasi baru.',
+                'tarif' => 'Rp ' . number_format($item->total_biaya ?? 150000, 0, ',', '.'),
+            ];
+        })->toArray();
 
-        // 5. Data Performa (Grafik & Analisis)
+        // ==========================================
+        // 5. DATA PERFORMA DINAMIS (GRAFIK 6 BULAN & HARI)
+        // ==========================================
         $performaData = [
-            'sesi_per_bulan_6' => [
-                ['bulan' => 'Mei', 'jumlah' => 9, 'is_active' => false],
-                ['bulan' => 'Jun', 'jumlah' => 12, 'is_active' => false],
-                ['bulan' => 'Jul', 'jumlah' => 14, 'is_active' => false],
-                ['bulan' => 'Agt', 'jumlah' => 11, 'is_active' => false],
-                ['bulan' => 'Sep', 'jumlah' => 16, 'is_active' => false],
-                ['bulan' => 'Okt', 'jumlah' => 18, 'is_active' => true, 'tooltip' => 'Okt: 18 sesi'],
-            ],
-            'sesi_per_bulan_3' => [
-                ['bulan' => 'Agt', 'jumlah' => 11, 'is_active' => false],
-                ['bulan' => 'Sep', 'jumlah' => 16, 'is_active' => false],
-                ['bulan' => 'Okt', 'jumlah' => 18, 'is_active' => true, 'tooltip' => 'Okt: 18 sesi'],
-            ],
+            'sesi_per_bulan_6' => [],
             'hari_tersibuk' => [
-                ['hari' => 'Sen', 'jumlah' => 4, 'is_active' => false],
-                ['hari' => 'Sel', 'jumlah' => 6, 'is_active' => false],
-                ['hari' => 'Rab', 'jumlah' => 3, 'is_active' => false],
-                ['hari' => 'Kam', 'jumlah' => 7, 'is_active' => false],
-                ['hari' => 'Jum', 'jumlah' => 8, 'is_active' => true],
-                ['hari' => 'Sab', 'jumlah' => 2, 'is_active' => false],
-                ['hari' => 'Min', 'jumlah' => 1, 'is_active' => false],
+                ['hari' => 'Sen', 'jumlah' => 0, 'is_active' => false],
+                ['hari' => 'Sel', 'jumlah' => 0, 'is_active' => false],
+                ['hari' => 'Rab', 'jumlah' => 0, 'is_active' => false],
+                ['hari' => 'Kam', 'jumlah' => 0, 'is_active' => false],
+                ['hari' => 'Jum', 'jumlah' => 0, 'is_active' => false],
+                ['hari' => 'Sab', 'jumlah' => 0, 'is_active' => false],
+                ['hari' => 'Min', 'jumlah' => 0, 'is_active' => false],
             ],
             'slot_terisi' => [
-                ['minggu' => 'Minggu 1', 'persentase' => 60],
-                ['minggu' => 'Minggu 2', 'persentase' => 75],
-                ['minggu' => 'Minggu 3', 'persentase' => 50],
-                ['minggu' => 'Minggu 4', 'persentase' => 85],
+                ['minggu' => 'Minggu 1', 'persentase' => 0],
+                ['minggu' => 'Minggu 2', 'persentase' => 0],
+                ['minggu' => 'Minggu 3', 'persentase' => 0],
+                ['minggu' => 'Minggu 4', 'persentase' => 0],
             ],
         ];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $monthDate = Carbon::now()->subMonths($i);
+            $mCount = Pemesanan::whereHas('jadwal', function ($q) use ($konselor) {
+                    $q->where('konselor_id', $konselor->id);
+                })
+                ->whereMonth('pemesanans.created_at', $monthDate->month)
+                ->whereYear('pemesanans.created_at', $monthDate->year)
+                ->whereIn('pemesanans.status', ['lunas', 'terkonfirmasi', 'selesai'])
+                ->count();
+
+            $performaData['sesi_per_bulan_6'][] = [
+                'bulan' => $monthDate->translatedFormat('M'),
+                'jumlah' => $mCount,
+                'is_active' => ($i === 0),
+                'tooltip' => $monthDate->translatedFormat('M') . ': ' . $mCount . ' sesi'
+            ];
+        }
+
+        // Hitung statistik hari tersibuk bulan ini dari database
+        $pemesananBulanIni = Pemesanan::with('jadwal')
+            ->whereHas('jadwal', function ($q) use ($konselor) {
+                $q->where('konselor_id', $konselor->id);
+            })
+            ->whereMonth('pemesanans.created_at', $currentMonth)
+            ->whereYear('pemesanans.created_at', $currentYear)
+            ->whereIn('pemesanans.status', ['lunas', 'terkonfirmasi', 'selesai'])
+            ->get();
+
+        $mappingHari = ['Mon' => 'Sen', 'Tue' => 'Sel', 'Wed' => 'Rab', 'Thu' => 'Kam', 'Fri' => 'Jum', 'Sat' => 'Sab', 'Sun' => 'Min'];
+        $counterHari = ['Sen' => 0, 'Sel' => 0, 'Rab' => 0, 'Kam' => 0, 'Jum' => 0, 'Sab' => 0, 'Min' => 0];
+
+        foreach ($pemesananBulanIni as $p) {
+            if ($p->jadwal && $p->jadwal->tanggal) {
+                $dayEnglish = Carbon::parse($p->jadwal->tanggal)->format('D');
+                if (isset($mappingHari[$dayEnglish])) {
+                    $counterHari[$mappingHari[$dayEnglish]]++;
+                }
+            }
+        }
+
+        $maxHariVal = max($counterHari) ?: 1;
+        foreach ($performaData['hari_tersibuk'] as &$h) {
+            $h['jumlah'] = $counterHari[$h['hari']];
+            $h['is_active'] = ($h['jumlah'] === max($counterHari) && $h['jumlah'] > 0);
+        }
+        unset($h);
 
         return view('konselor.dashboard', compact(
             'konselor',
@@ -182,14 +214,13 @@ class BerandaKonselorController extends Controller
             'counselorTitle',
             'counselorInitials',
             'stats',
-            'sesiBerikutnya',
-            'jadwalHariIni',
+            'nextSesi',
+            'jadwalHariIniList',
             'bookingMenunggu',
             'performaData'
         ));
     }
 
-    // 🌟 METHOD UTAMA HALAMAN BOOKING MASUK
     public function bookingMasuk()
     {
         $user = Auth::user();
@@ -199,7 +230,6 @@ class BerandaKonselorController extends Controller
             return redirect()->route('konselor.dashboard')->with('error', 'Profil konselor belum diatur.');
         }
 
-        // Ambil data pemesanan yang masuk ke jadwal konselor ini
         $pemesanans = Pemesanan::with(['user', 'jadwal'])
             ->whereHas('jadwal', function ($query) use ($konselor) {
                 $query->where('konselor_id', $konselor->id);
