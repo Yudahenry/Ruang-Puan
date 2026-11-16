@@ -178,10 +178,19 @@ class KonsultasiController extends Controller
         }
 
         $pemesanan->update([
-            'status' => 'lunas',
+            'status' => 'terkonfirmasi',
             'status_pembayaran' => 'lunas',
             'metode_pembayaran' => $detailMetode,
         ]);
+
+        \App\Models\Konsultasi::firstOrCreate(
+            ['pemesanan_id' => $pemesanan->id],
+            [
+                'tanggal_konsultasi' => $pemesanan->jadwalKonsultasi?->tanggal ?? $pemesanan->jadwal?->tanggal,
+                'jam_konsultasi'     => $pemesanan->jadwalKonsultasi?->jam_mulai ?? $pemesanan->jadwal?->jam_mulai,
+                'status'             => 'terjadwal',
+            ]
+        );
 
         return redirect()->route('pengguna.dashboard')
                          ->with('success', 'Pembayaran berhasil dikonfirmasi! Jadwal konsultasi Anda telah aktif.');

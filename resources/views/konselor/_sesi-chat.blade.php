@@ -7,7 +7,8 @@
             $q->where('user_id', auth()->id());
         })
         ->whereHas('pemesanan', function ($q) {
-            $q->where('status', 'terkonfirmasi');
+            $q->whereIn('status', ['terkonfirmasi', 'lunas'])
+              ->orWhere('status_pembayaran', 'lunas');
         })
         ->get()
         ->filter(fn ($k) => in_array($k->status_efektif, ['terjadwal', 'berlangsung']))
