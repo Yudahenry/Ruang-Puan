@@ -27,11 +27,16 @@
         </div>
     </div>
 
-    <!-- Alert Sukses / Error -->
+    <!-- Alert Sukses / Banner Notifikasi Hijau -->
     @if(session('success'))
-        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs sm:text-sm font-semibold shadow-2xs flex items-center gap-2">
-            <span>✓</span>
-            <span>{{ session('success') }}</span>
+        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs sm:text-sm font-semibold shadow-2xs flex items-center gap-3 transition-all animate-fadeIn">
+            <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 font-bold">
+                ✓
+            </div>
+            <div>
+                <span class="block text-emerald-900 font-bold">Berhasil!</span>
+                <span class="text-emerald-700 font-normal">{{ session('success') }}</span>
+            </div>
         </div>
     @endif
 
@@ -159,13 +164,7 @@
                                 <!-- Tombol Tolak -->
                                 @if($konselor->status_verifikasi !== 'ditolak')
                                     <button type="button"
-                                            @click="$dispatch('open-confirm-modal', { 
-                                                url: '{{ route('admin.konselor.tolak', $konselor->id) }}', 
-                                                title: 'Tolak Pengajuan Konselor', 
-                                                message: 'Masukkan alasan penolakan dokumen agar calon konselor dapat memperbaikinya.', 
-                                                confirmText: 'Tolak Pengajuan', 
-                                                withReason: true 
-                                            })"
+                                            onclick="openTolakModal('{{ route('admin.konselor.tolak', $konselor->id) }}')"
                                             class="px-3.5 py-1.5 border border-rose-300 text-rose-700 hover:bg-rose-50 rounded-xl text-xs font-semibold transition active:scale-[0.98]">
                                         Tolak
                                     </button>
@@ -247,6 +246,36 @@
     </div>
 </div>
 
+<!-- Modal Pop-up Alasan Penolakan (Vanilla JS) -->
+<div id="modalTolakKonselor" class="fixed inset-0 z-50 flex items-center justify-center bg-[#3E293F]/50 backdrop-blur-xs hidden p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-[#DCD5DD]">
+        <div class="flex justify-between items-center pb-4 border-b border-[#DCD5DD]/70 mb-4">
+            <h3 class="text-lg font-serif font-bold text-[#3E293F]">Tolak Pengajuan Konselor</h3>
+            <button type="button" onclick="closeTolakModal()" class="text-[#746B77] hover:text-[#3E293F] font-bold">✕</button>
+        </div>
+
+        <form id="formTolakKonselor" method="POST">
+            @csrf
+            <p class="text-xs sm:text-sm text-[#746B77] mb-4">Masukkan alasan penolakan dokumen agar calon konselor dapat memperbaikinya.</p>
+            
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-[#3E293F] mb-1.5">Alasan Penolakan <span class="text-red-500">*</span></label>
+                <textarea name="alasan_penolakan" rows="3" required placeholder="Tulis alasan penolakan dokumen/pengajuan..."
+                          class="w-full rounded-2xl border border-[#DCD5DD] bg-[#FCFAF8] focus:border-[#643B62] focus:ring-1 focus:ring-[#643B62] focus:outline-none px-4 py-3 text-xs text-[#3E293F] shadow-inner transition"></textarea>
+            </div>
+
+            <div class="flex items-center justify-end space-x-3 pt-4 border-t border-[#DCD5DD]/60">
+                <button type="button" onclick="closeTolakModal()" class="px-5 py-2.5 rounded-xl bg-[#EEE7F2] hover:bg-[#DCD5DD] text-[#3E293F] text-xs font-bold transition">
+                    Batal
+                </button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm transition">
+                    Tolak Pengajuan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function openDetailModal(data) {
     document.getElementById('det-nama').innerText = data.nama;
@@ -275,7 +304,14 @@ function openDetailModal(data) {
 function closeDetailModal() {
     document.getElementById('modalDetailKonselor').classList.add('hidden');
 }
-</script>
 
-<x-modal-confirm />
+function openTolakModal(url) {
+    document.getElementById('formTolakKonselor').action = url;
+    document.getElementById('modalTolakKonselor').classList.remove('hidden');
+}
+
+function closeTolakModal() {
+    document.getElementById('modalTolakKonselor').classList.add('hidden');
+}
+</script>
 @endsection

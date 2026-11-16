@@ -54,16 +54,16 @@ class BerandaKonselorController extends Controller
             ->where('status', 'terpesan')
             ->count();
 
-        $realBookingMenunggu = Pemesanan::whereHas('jadwalKonsultasi', function ($q) use ($konselor) {
+        $realBookingMenunggu = Pemesanan::whereHas('jadwal', function ($q) use ($konselor) {
             $q->where('konselor_id', $konselor->id);
         })->where('status', 'menunggu_pembayaran')->count();
 
-        $realSesiSelesaiBulanIni = Konsultasi::whereHas('pemesanan.jadwalKonsultasi', function ($q) use ($konselor) {
+        $realSesiSelesaiBulanIni = Konsultasi::whereHas('pemesanan.jadwal', function ($q) use ($konselor) {
             $q->where('konselor_id', $konselor->id);
         })->whereMonth('tanggal_konsultasi', Carbon::now()->month)
           ->where('status', 'selesai')->count();
 
-        $realTotalSesi = Konsultasi::whereHas('pemesanan.jadwalKonsultasi', function ($q) use ($konselor) {
+        $realTotalSesi = Konsultasi::whereHas('pemesanan.jadwal', function ($q) use ($konselor) {
             $q->where('konselor_id', $konselor->id);
         })->count();
 
@@ -189,15 +189,38 @@ class BerandaKonselorController extends Controller
         ));
     }
 
+    // 🌟 METHOD UTAMA HALAMAN BOOKING MASUK
+    public function bookingMasuk()
+    {
+        $user = Auth::user();
+        $konselor = $user->konselor;
+
+        if (!$konselor) {
+            return redirect()->route('konselor.dashboard')->with('error', 'Profil konselor belum diatur.');
+        }
+
+        // Ambil data pemesanan yang masuk ke jadwal konselor ini
+        $pemesanans = Pemesanan::with(['user', 'jadwal'])
+            ->whereHas('jadwal', function ($query) use ($konselor) {
+                $query->where('konselor_id', $konselor->id);
+            })
+            ->latest()
+            ->get();
+
+        $totalBooking = $pemesanans->count();
+        $lunas = $pemesanans->where('status_pembayaran', 'lunas')->count();
+        $pending = $pemesanans->where('status_pembayaran', 'pending')->count();
+
+        return view('konselor.booking-masuk', compact('pemesanans', 'totalBooking', 'lunas', 'pending'));
+    }
+
     public function konfirmasiBooking(Request $request, $id)
     {
-        // Mendukung konfirmasi booking
         return back()->with('success', 'Permintaan booking #' . $id . ' berhasil dikonfirmasi ke jadwal konsultasi.');
     }
 
     public function tolakBooking(Request $request, $id)
     {
-        // Mendukung penolakan booking
         return back()->with('success', 'Permintaan booking #' . $id . ' telah ditolak.');
     }
 

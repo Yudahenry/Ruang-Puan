@@ -94,3 +94,12 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        // Global listener untuk memastikan event modal tertangkap dengan baik
+        window.addEventListener('open-confirm-modal', event => {
+            // Event ditangani otomatis oleh x-data alpine diatas
+        });
+    });
+</script>

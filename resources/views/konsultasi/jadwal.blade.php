@@ -75,9 +75,11 @@
                     <div class="bg-[#EEE7F2]/50 border border-[#DCD5DD] rounded-2xl p-4 flex items-center justify-between text-xs text-[#3E293F]">
                         <div class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-[#643B62] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span>Durasi sesi konsultasi: <strong>60 menit</strong> (melalui chat privat aman).</span>
+                            <span>Durasi sesi konsultasi: <strong>{{ $konselor->durasi_sesi ?? 60 }} menit</strong> (melalui chat privat aman).</span>
                         </div>
-                        <span class="font-bold text-[#643B62]">Rp150.000</span>
+                        <span class="font-bold text-[#643B62]">
+                            Rp {{ number_format($konselor->tarif ?? $konselor->harga_sesi ?? $konselor->harga ?? 0, 0, ',', '.') }}
+                        </span>
                     </div>
 
                     <!-- Tombol Aksi -->

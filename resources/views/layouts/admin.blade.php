@@ -19,7 +19,7 @@
                 <span class="text-xs bg-purple-900 px-2 py-0.5 rounded text-purple-200">ADMIN</span>
             </div>
 
-            <!-- Menu Navigasi (Bisa di-scroll jika menu banyak) -->
+            <!-- Menu Navigasi -->
             <nav class="flex-1 p-4 space-y-1.5 text-sm overflow-y-auto">
                 <p class="text-xs font-semibold text-purple-300 uppercase tracking-wider mb-2">Menu Utama</p>
                 <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 rounded-lg hover:bg-purple-800 transition {{ request()->routeIs('admin.dashboard') ? 'bg-purple-800 font-semibold' : '' }}">Dashboard</a>
@@ -43,19 +43,48 @@
 
         <!-- KONTEN UTAMA DI KANAN -->
         <div class="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-gray-50">
-            <!-- Header Atas (Tetap di atas, tidak ikut scroll) -->
+            <!-- Header Atas -->
             <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6 border-b shrink-0 z-10">
                 <span class="text-sm font-medium text-gray-600">Panel Administrasi Sistem</span>
                 <span class="text-sm font-semibold text-gray-800">{{ auth()->user()->name ?? 'Admin' }}</span>
             </header>
 
-            <!-- Area Konten Utama (HANYA BAGIAN INI YANG BISA DI-SCROLL KE BAWAH) -->
-            <main class="flex-1 overflow-y-auto p-6">
+            <!-- Area Konten Utama (BISA DI-SCROLL KE BAWAH) -->
+            <main class="flex-1 overflow-y-auto p-6 space-y-4">
+                
+                <!-- 🌟 GLOBAL ALERT: Otomatis muncul di semua halaman admin setelah tindakan apa saja -->
+                @if(session('success'))
+                    <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs sm:text-sm font-semibold shadow-2xs flex items-center gap-3 transition-all">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 font-bold">
+                            ✓
+                        </div>
+                        <div>
+                            <span class="block text-emerald-900 font-bold">Berhasil!</span>
+                            <span class="text-emerald-700 font-normal">{{ session('success') }}</span>
+                        </div>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs sm:text-sm font-semibold shadow-2xs flex items-center gap-3 transition-all">
+                        <div class="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 font-bold">
+                            ✕
+                        </div>
+                        <div>
+                            <span class="block text-rose-900 font-bold">Perhatian!</span>
+                            <span class="text-rose-700 font-normal">{{ session('error') }}</span>
+                        </div>
+                    </div>
+                @endif
+
                 @yield('content')
                 @yield('admin-content')
             </main>
         </div>
 
     </div>
+
+    <x-modal-confirm />
+
 </body>
 </html>
