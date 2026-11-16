@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('admin-content')
-<div class="bg-white rounded-2xl shadow-sm border border-cream-200 p-8">
+<div x-data="{}" class="bg-white rounded-2xl shadow-sm border border-cream-200 p-8">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-2xl font-bold text-berry-900">Kelola Materi Edukasi</h1>
