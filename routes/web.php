@@ -141,6 +141,10 @@ Route::redirect('/verifikasi-konselor', '/admin/konselor');
 Route::middleware(['auth', 'verified', 'role:pengguna'])->prefix('pengguna')->name('pengguna.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Pengguna\BerandaController::class, 'index'])->name('dashboard');
     Route::get('/riwayat-konsultasi', [\App\Http\Controllers\Pengguna\RiwayatKonsultasiController::class, 'index'])->name('riwayat-konsultasi');
+    
+    // Tambahan route khusus untuk melihat & mencetak invoice booking
+    Route::get('/riwayat-konsultasi/{id}/invoice', [\App\Http\Controllers\Pengguna\RiwayatKonsultasiController::class, 'invoice'])->name('riwayat-konsultasi.invoice');
+
     Route::get('/chat/{id}', [\App\Http\Controllers\Pengguna\ChatController::class, 'show'])->name('chat.show');
     Route::post('/chat/{id}', [\App\Http\Controllers\Pengguna\ChatController::class, 'store'])->name('chat.store');
 });
@@ -161,9 +165,9 @@ Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->na
     Route::get('/chat/{id}', [\App\Http\Controllers\Konselor\ChatController::class, 'show'])->whereNumber('id')->name('chat.show');
     Route::post('/chat/{id}', [\App\Http\Controllers\Konselor\ChatController::class, 'store'])->whereNumber('id')->name('chat.store');
 
-    Route::get('/booking', function () {
-        return redirect()->route('konselor.dashboard', ['tab' => 'booking']);
-    })->name('booking');
+    // 🌟 Rute Booking Masuk diarahkan ke method bookingMasuk di BerandaKonselorController
+    Route::get('/booking', [BerandaKonselorController::class, 'bookingMasuk'])->name('booking');
+
     Route::get('/chat', function () {
         return redirect()->route('konselor.dashboard', ['modal' => 'chat']);
     })->name('chat');

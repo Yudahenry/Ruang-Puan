@@ -171,6 +171,12 @@
 @section('content')
 <div class="min-h-screen text-[#3E293F] flex flex-col justify-between">
     <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+        
+        <!-- 🌟 POP-UP NOTIFIKASI GLOBAL (Toast Sukses / Error) -->
+        <div class="max-w-xl mx-auto mb-4">
+            <x-toast />
+        </div>
+
         @yield('pengguna-content')
     </main>
 

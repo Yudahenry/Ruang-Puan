@@ -30,13 +30,18 @@ class JadwalKonsultasiController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth()->user();
+
+        // Pengecekan: Jika akun konselor dinonaktifkan oleh admin, blokir penambahan jadwal
+        if ($user->status === 'nonaktif') {
+            return redirect()->back()->with('error', 'Akun Anda sedang dinonaktifkan oleh admin. Anda tidak dapat menambah jadwal.');
+        }
+
         $request->validate([
             'tanggal' => 'required|date|after_or_equal:today',
             'jam_mulai' => 'required',
             'jam_selesai' => 'required|after:jam_mulai',
         ]);
-
-        $user = auth()->user();
 
         JadwalKonsultasi::create([
             'konselor_id' => $user->konselor->id,

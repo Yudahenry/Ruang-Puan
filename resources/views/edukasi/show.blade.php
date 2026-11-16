@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.pengguna')
 
-@section('content')
+@section('pengguna-content')
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     <div class="mb-6">
         <a href="{{ route('edukasi.index') }}" class="text-xs font-semibold text-[#643B62] hover:underline mb-3 inline-flex items-center gap-1">

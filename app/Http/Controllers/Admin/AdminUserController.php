@@ -19,7 +19,16 @@ class AdminUserController extends Controller
             ? $request->query('peran')
             : 'pengguna';
 
-        $users = User::where('role', $peran)->latest()->paginate(10)->withQueryString();
+        $query = User::where('role', $peran);
+
+        // Jika tab yang dibuka adalah 'konselor', filter melalui relasi tabel konselors
+        if ($peran === 'konselor') {
+            $query->whereHas('konselor', function($q) {
+                $q->where('status_verifikasi', 'disetujui');
+            });
+        }
+
+        $users = $query->latest()->paginate(10)->withQueryString();
 
         // Jumlah akun per peran untuk label tab
         $jumlah = User::selectRaw('role, count(*) as total')->groupBy('role')->pluck('total', 'role');
