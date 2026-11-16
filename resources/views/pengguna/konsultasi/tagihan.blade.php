@@ -1,14 +1,15 @@
-@extends('layouts.app')
+@php
+    $isKonselor = (auth()->check() && (auth()->user()->role === 'konselor' || auth()->user()->role === 'admin')) || request()->is('konselor*');
+    $layout = $isKonselor ? 'layouts.konselor' : 'layouts.pengguna';
+@endphp
 
-@section('content')
+@extends($layout)
+
+@section($isKonselor ? 'konselor-content' : 'pengguna-content')
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
     
     <!-- Tombol Atas: Kembali & Cetak PDF -->
     <div class="mb-6 flex items-center justify-between">
-        @php
-            $isKonselor = auth()->check() && auth()->user()->role === 'konselor';
-        @endphp
-
         <a href="{{ $isKonselor ? route('konselor.booking') : route('konsultasi.index') }}" 
            class="text-xs font-semibold text-[#643B62] hover:underline inline-flex items-center gap-1">
             &larr; Kembali ke {{ $isKonselor ? 'Booking Masuk' : 'Daftar Konsultasi' }}
