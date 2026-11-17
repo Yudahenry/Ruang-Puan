@@ -78,4 +78,36 @@ class AdminEdukasiController extends Controller
 
         return redirect()->route('admin.edukasi.index')->with('success', 'Materi edukasi berhasil dihapus.');
     }
+    public function editMateri($id)
+    {
+        $materi = MateriEdukasi::findOrFail($id);
+        $kategoris = KategoriEdukasi::all();
+        return view('admin.edukasi.edit-materi', compact('materi', 'kategoris'));
+    }
+
+    public function updateMateri(Request $request, $id)
+    {
+        $materi = MateriEdukasi::findOrFail($id);
+
+        $request->validate([
+            'kategori_id' => ['required', 'exists:kategori_edukasis,id'],
+            'judul' => ['required', 'string', 'max:200'],
+            'isi' => ['required', 'string'],
+            'jenis_konten' => ['required', 'in:artikel,infografis,video'],
+            'file_url' => ['nullable', 'string', 'max:255'],
+            'status' => ['required', 'in:draft,terbit'],
+        ]);
+
+        $materi->update([
+            'kategori_id' => $request->kategori_id,
+            'judul' => $request->judul,
+            'isi' => $request->isi,
+            'jenis_konten' => $request->jenis_konten,
+            'file_url' => $request->file_url,
+            'status' => $request->status,
+            'tanggal_posting' => $request->status === 'terbit' ? ($materi->tanggal_posting ?? now()) : null,
+        ]);
+
+        return redirect()->route('admin.edukasi.index')->with('success', 'Materi edukasi berhasil diperbarui.');
+    }
 }

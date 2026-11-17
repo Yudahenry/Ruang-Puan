@@ -172,21 +172,26 @@
                             <span class="text-xs text-[#746B77]">
                                 {{ $konsultasiMendatang->durasi ?? 60 }} menit · Rp {{ number_format($konsultasiMendatang->total_biaya ?? 0, 0, ',', '.') }}
                             </span>
-                            @if($konsultasiMendatang->status === 'terkonfirmasi' && $konsultasiMendatang->konsultasi)
-                                @php
-                                    $sesiKonsultasi = $konsultasiMendatang->konsultasi;
-                                    $isSesiAktif = $sesiKonsultasi->sesiAktif();
-                                @endphp
-                                @if($isSesiAktif)
-                                    <a href="{{ route('konsultasi.chat', $sesiKonsultasi->id) }}" class="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#643B62] hover:bg-[#3E293F] text-white rounded-xl text-xs font-semibold shadow-xs transition">
-                                        <span>Buka Chat</span>
-                                        <span>&rarr;</span>
-                                    </a>
-                                @else
-                                    <a href="{{ route('konsultasi.chat', $sesiKonsultasi->id) }}" class="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#EEE7F2] hover:bg-[#DCD5DD] text-[#746B77] hover:text-[#3E293F] border border-[#DCD5DD] rounded-xl text-xs font-semibold transition" title="Sesi belum dimulai">
-                                        <span>Belum dimulai</span>
-                                    </a>
-                                @endif
+                            @php
+                                $isConfirmed = in_array($konsultasiMendatang->status, ['terkonfirmasi', 'lunas']) || $konsultasiMendatang->status_pembayaran === 'lunas';
+                                $sesiKonsultasi = $konsultasiMendatang->konsultasi;
+                                if ($isConfirmed && !$sesiKonsultasi && $jadwal) {
+                                    $sesiKonsultasi = \App\Models\Konsultasi::firstOrCreate(
+                                        ['pemesanan_id' => $konsultasiMendatang->id],
+                                        [
+                                            'tanggal_konsultasi' => $jadwal->tanggal,
+                                            'jam_konsultasi'     => $jadwal->jam_mulai,
+                                            'status'             => 'terjadwal',
+                                        ]
+                                    );
+                                }
+                            @endphp
+                            @if($isConfirmed && $sesiKonsultasi)
+                                <a href="{{ route('konsultasi.chat', $sesiKonsultasi->id) }}" 
+                                   class="inline-flex items-center space-x-2 px-5 py-2.5 bg-[#4A1D33] hover:bg-[#3E293F] text-white rounded-2xl text-xs font-semibold shadow-sm transition">
+                                    <span>Buka Chat</span>
+                                    <span>&rarr;</span>
+                                </a>
                             @endif
                         </div>
                     </div>

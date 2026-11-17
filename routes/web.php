@@ -118,6 +118,8 @@ Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admi
     Route::post('/edukasi', [AdminEdukasiController::class, 'storeMateri'])->name('edukasi.store');
     Route::post('/edukasi/kategori', [AdminEdukasiController::class, 'storeKategori'])->name('edukasi.kategori.store');
     Route::delete('/edukasi/{id}', [AdminEdukasiController::class, 'destroyMateri'])->name('edukasi.destroy');
+    Route::get('/edukasi/{id}/edit', [AdminEdukasiController::class, 'editMateri'])->name('edukasi.edit');
+    Route::put('/edukasi/{id}', [AdminEdukasiController::class, 'updateMateri'])->name('edukasi.update');
 
     Route::get('/direktori', [AdminDirektoriController::class, 'index'])->name('direktori.index');
     Route::get('/direktori/create', [AdminDirektoriController::class, 'create'])->name('direktori.create');
