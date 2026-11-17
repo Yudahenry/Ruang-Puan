@@ -70,6 +70,7 @@
                             </span>
                         </td>
                         <td class="p-3 text-right">
+                            <a href="{{ route('admin.edukasi.edit', $materi->id) }}" class="px-3 py-1 bg-berry-700 hover:bg-berry-900 text-white rounded-lg text-xs font-semibold transition-all duration-200">Edit</a>
                             <button type="button" 
                                     @click="$dispatch('open-confirm-modal', { 
                                         url: '{{ route('admin.edukasi.destroy', $materi->id) }}', 
