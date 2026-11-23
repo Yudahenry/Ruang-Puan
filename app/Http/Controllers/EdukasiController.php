@@ -41,9 +41,10 @@ class EdukasiController extends Controller
             ->where('status', 'terbit')
             ->findOrFail($id);
 
-        $relatedMateris = MateriEdukasi::where('status', 'terbit')
-            ->where('kategori_id', $materi->kategori_id)
+                $relatedMateris = MateriEdukasi::with('kategoriEdukasi')
+            ->where('status', 'terbit')
             ->where('id', '!=', $materi->id)
+            ->orderByRaw('CASE WHEN kategori_id = ? THEN 0 ELSE 1 END', [$materi->kategori_id])
             ->latest()
             ->take(3)
             ->get();

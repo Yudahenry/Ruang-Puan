@@ -61,7 +61,7 @@ class AdminEdukasiController extends Controller
             'kategori_id' => $request->kategori_id,
             'dikelola_oleh' => $adminId,
             'judul' => $request->judul,
-            'isi' => $request->isi,
+            'isi' => \App\Support\HtmlBersih::bersihkan($request->isi),
             'jenis_konten' => $request->jenis_konten,
             'file_url' => $request->file_url,
             'status' => $request->status,
