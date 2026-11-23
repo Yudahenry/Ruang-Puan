@@ -58,6 +58,7 @@
                     <tr class="bg-[#FCFAF8] text-[#3E293F] border-b border-[#DCD5DD] text-xs font-bold uppercase tracking-wider">
                         <th class="p-4 sm:px-6">Konselor</th>
                         <th class="p-4 sm:px-6">Spesialisasi / Keahlian</th>
+                        <th class="p-4 sm:px-6">Kelengkapan Profil</th>
                         <th class="p-4 sm:px-6">Legalitas (STR/SIPP)</th>
                         <th class="p-4 sm:px-6">Dokumen</th>
                         <th class="p-4 sm:px-6">Status Verifikasi</th>
@@ -66,6 +67,10 @@
                 </thead>
                 <tbody class="divide-y divide-[#DCD5DD]/60">
                     @forelse($konselors as $konselor)
+                        @php
+                            $kelengkapan = $konselor->kelengkapanProfil();
+                            $isLengkap = $kelengkapan['is_lengkap'];
+                        @endphp
                         <tr class="hover:bg-[#FCFAF8]/80 transition-colors duration-150">
                             <!-- Nama & Email -->
                             <td class="p-4 sm:px-6">
@@ -88,6 +93,25 @@
                                     </span>
                                 @else
                                     <span class="text-[#746B77]">{{ $konselor->bidang_keahlian ?? 'Psikolog Klinis' }}</span>
+                                @endif
+                            </td>
+
+                            <!-- Status Kelengkapan Profil & Kredensial -->
+                            <td class="p-4 sm:px-6">
+                                @if($isLengkap)
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Profil Lengkap (100%)
+                                    </span>
+                                @else
+                                    <div>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300" 
+                                              title="{{ implode(', ', $kelengkapan['missing']) }}">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Belum Lengkap ({{ $kelengkapan['persentase'] }}%)
+                                        </span>
+                                        <span class="block text-[11px] text-[#746B77] mt-1 font-medium">
+                                            {{ count($kelengkapan['missing']) }} data wajib belum terisi
+                                        </span>
+                                    </div>
                                 @endif
                             </td>
 
@@ -143,22 +167,35 @@
                                             'no_sipp' => $konselor->no_sipp ?? 'Belum diisi',
                                             'bidang_keahlian' => !empty($konselor->spesialisasi) ? (is_array($konselor->spesialisasi) ? implode(', ', $konselor->spesialisasi) : $konselor->spesialisasi) : ($konselor->bidang_keahlian ?? 'Umum'),
                                             'status_verifikasi' => ucfirst($konselor->status_verifikasi),
-                                            'dokumen_url' => $konselor->dokumen_verifikasi ? asset('storage/' . $konselor->dokumen_verifikasi) : null
+                                            'dokumen_url' => $konselor->dokumen_verifikasi ? asset('storage/' . $konselor->dokumen_verifikasi) : null,
+                                            'is_lengkap' => $isLengkap,
+                                            'persentase' => $kelengkapan['persentase'],
+                                            'missing' => array_values($kelengkapan['missing'])
                                         ]) }})"
                                         class="px-3.5 py-1.5 bg-[#EEE7F2] hover:bg-[#DCD5DD] text-[#3E293F] rounded-xl text-xs font-semibold transition active:scale-[0.98]">
                                     Detail
                                 </button>
 
-                                <!-- Tombol Setujui -->
+                                <!-- Tombol Setujui (Terkunci jika profil belum lengkap) -->
                                 @if($konselor->status_verifikasi !== 'disetujui')
-                                    <form method="POST" action="{{ route('admin.konselor.verifikasi', $konselor->id) }}" class="inline">
-                                        @csrf
-                                        <button type="submit" 
-                                                onclick="return confirm('Apakah Anda yakin ingin menyetujui akun konselor ini?')"
-                                                class="px-3.5 py-1.5 bg-[#643B62] hover:bg-[#3E293F] text-white rounded-xl text-xs font-semibold shadow-sm transition active:scale-[0.98]">
-                                            Setujui
+                                    @if($isLengkap)
+                                        <form method="POST" action="{{ route('admin.konselor.verifikasi', $konselor->id) }}" class="inline">
+                                            @csrf
+                                            <button type="submit" 
+                                                    onclick="return confirm('Apakah Anda yakin ingin menyetujui akun konselor ini?')"
+                                                    class="px-3.5 py-1.5 bg-[#643B62] hover:bg-[#3E293F] text-white rounded-xl text-xs font-semibold shadow-sm transition active:scale-[0.98]">
+                                                Setujui
+                                            </button>
+                                        </form>
+                                    @else
+                                        <button type="button" 
+                                                disabled 
+                                                title="Tidak dapat disetujui: Profil dan kredensial konselor baru terisi {{ $kelengkapan['persentase'] }}%"
+                                                class="px-3.5 py-1.5 bg-gray-200 text-gray-400 border border-gray-300 rounded-xl text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1 opacity-75">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                            <span>Setujui</span>
                                         </button>
-                                    </form>
+                                    @endif
                                 @endif
 
                                 <!-- Tombol Tolak -->
@@ -173,7 +210,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="p-10 text-center text-[#746B77] text-xs sm:text-sm">
+                            <td colspan="7" class="p-10 text-center text-[#746B77] text-xs sm:text-sm">
                                 <div class="w-12 h-12 rounded-2xl bg-[#EEE7F2] text-[#643B62] flex items-center justify-center mx-auto text-xl mb-3 shadow-inner">
                                     📋
                                 </div>
@@ -210,6 +247,18 @@
                 <span class="block font-bold text-[#3E293F] uppercase tracking-wider text-[10px]">Alamat Email</span>
                 <p id="det-email" class="mt-1 text-sm text-[#746B77] font-medium">-</p>
             </div>
+
+            <!-- Status Kelengkapan di Modal -->
+            <div class="p-3.5 bg-[#FCFAF8] rounded-2xl border border-[#DCD5DD]">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="font-bold text-[#3E293F] uppercase tracking-wider text-[10px]">Kelengkapan Data</span>
+                    <span id="det-persentase" class="font-bold text-xs text-[#643B62]">0%</span>
+                </div>
+                <div id="det-missing-box" class="text-[11px] text-[#746B77] mt-1 space-y-1">
+                    <!-- Missing items list -->
+                </div>
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <span class="block font-bold text-[#3E293F] uppercase tracking-wider text-[10px]">Nomor STR</span>
@@ -249,27 +298,31 @@
 <!-- Modal Pop-up Alasan Penolakan (Vanilla JS) -->
 <div id="modalTolakKonselor" class="fixed inset-0 z-50 flex items-center justify-center bg-[#3E293F]/50 backdrop-blur-xs hidden p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-[#DCD5DD]">
-        <div class="flex justify-between items-center pb-4 border-b border-[#DCD5DD]/70 mb-4">
-            <h3 class="text-lg font-serif font-bold text-[#3E293F]">Tolak Pengajuan Konselor</h3>
-            <button type="button" onclick="closeTolakModal()" class="text-[#746B77] hover:text-[#3E293F] font-bold">✕</button>
+        <div class="flex justify-between items-center pb-4 border-b border-[#DCD5DD]/70 mb-5">
+            <h3 class="text-lg font-serif font-bold text-[#3E293F]">Tolak Verifikasi Konselor</h3>
+            <button type="button" onclick="closeTolakModal()" class="text-[#746B77] hover:text-[#3E293F] text-base font-bold p-1">✕</button>
         </div>
 
-        <form id="formTolakKonselor" method="POST">
+        <form id="formTolakKonselor" method="POST" action="" class="space-y-4">
             @csrf
-            <p class="text-xs sm:text-sm text-[#746B77] mb-4">Masukkan alasan penolakan dokumen agar calon konselor dapat memperbaikinya.</p>
-            
-            <div class="mb-4">
-                <label class="block text-xs font-bold text-[#3E293F] mb-1.5">Alasan Penolakan <span class="text-red-500">*</span></label>
-                <textarea name="alasan_penolakan" rows="3" required placeholder="Tulis alasan penolakan dokumen/pengajuan..."
-                          class="w-full rounded-2xl border border-[#DCD5DD] bg-[#FCFAF8] focus:border-[#643B62] focus:ring-1 focus:ring-[#643B62] focus:outline-none px-4 py-3 text-xs text-[#3E293F] shadow-inner transition"></textarea>
+            <div>
+                <label for="alasan_penolakan" class="block text-xs font-bold text-[#3E293F] mb-1.5">
+                    Alasan Penolakan <span class="text-rose-500">*</span>
+                </label>
+                <textarea id="alasan_penolakan" name="alasan_penolakan" rows="4" required
+                          placeholder="Jelaskan alasan penolakan berkas (misal: dokumen STR kedaluwarsa, resolusi scan blur, dsb.)..."
+                          class="w-full text-xs p-3.5 rounded-2xl border border-[#DCD5DD] focus:outline-none focus:ring-1 focus:ring-[#643B62] focus:border-[#643B62] transition"></textarea>
+                <p class="text-[11px] text-[#746B77] mt-1">Alasan ini akan ditampilkan ke konselor terkait pada dashboard mereka.</p>
             </div>
 
-            <div class="flex items-center justify-end space-x-3 pt-4 border-t border-[#DCD5DD]/60">
-                <button type="button" onclick="closeTolakModal()" class="px-5 py-2.5 rounded-xl bg-[#EEE7F2] hover:bg-[#DCD5DD] text-[#3E293F] text-xs font-bold transition">
+            <div class="flex justify-end gap-2.5 pt-2">
+                <button type="button" onclick="closeTolakModal()" 
+                        class="px-4 py-2.5 bg-[#EEE7F2] hover:bg-[#DCD5DD] text-[#3E293F] rounded-xl text-xs font-semibold transition">
                     Batal
                 </button>
-                <button type="submit" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm transition">
-                    Tolak Pengajuan
+                <button type="submit" 
+                        class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-sm transition">
+                    Kirim Penolakan
                 </button>
             </div>
         </form>
@@ -284,6 +337,22 @@ function openDetailModal(data) {
     document.getElementById('det-sipp').innerText = data.no_sipp;
     document.getElementById('det-keahlian').innerText = data.bidang_keahlian;
     document.getElementById('det-status').innerText = data.status_verifikasi;
+
+    const persentaseEl = document.getElementById('det-persentase');
+    const missingBox = document.getElementById('det-missing-box');
+
+    if (data.is_lengkap) {
+        persentaseEl.innerHTML = `<span class="text-emerald-700">✓ Lengkap (100%)</span>`;
+        missingBox.innerHTML = `<p class="text-emerald-700">Semua data identitas, spesialisasi, dan kredensial legalitas telah terisi lengkap.</p>`;
+    } else {
+        persentaseEl.innerHTML = `<span class="text-amber-800">⚠️ Terisi ${data.persentase}%</span>`;
+        let itemsHtml = '<p class="text-rose-700 font-semibold mb-1">Data belum lengkap:</p><ul class="list-disc list-inside space-y-0.5">';
+        (data.missing || []).forEach(item => {
+            itemsHtml += `<li>${item}</li>`;
+        });
+        itemsHtml += '</ul>';
+        missingBox.innerHTML = itemsHtml;
+    }
 
     const docWrapper = document.getElementById('det-dokumen-wrapper');
     if (data.dokumen_url) {

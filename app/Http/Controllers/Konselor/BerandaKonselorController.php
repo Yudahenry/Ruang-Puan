@@ -23,12 +23,14 @@ class BerandaKonselorController extends Controller
             $konselor = Konselor::firstOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'status_verifikasi' => 'disetujui',
-                    'bidang_keahlian' => 'Psikolog Klinis & Konseling Remaja/Dewasa',
-                    'tarif' => 150000,
+                    'status_verifikasi' => 'menunggu',
                 ]
             );
         }
+
+        // Hitung kelengkapan profil & kredensial konselor
+        $kelengkapan = $konselor->kelengkapanProfil();
+        $isProfilLengkap = $konselor->isProfilLengkap();
 
         // Tentukan nama sapaan & gelar secara dinamis dari user login
         $greetingName = 'Bu Dewi';
@@ -210,6 +212,8 @@ class BerandaKonselorController extends Controller
 
         return view('konselor.dashboard', compact(
             'konselor',
+            'kelengkapan',
+            'isProfilLengkap',
             'greetingName',
             'counselorTitle',
             'counselorInitials',

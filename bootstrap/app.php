@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function ($middleware) {
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureRole::class,
+            'konselor.profil_lengkap' => \App\Http\Middleware\EnsureKonselorProfileComplete::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

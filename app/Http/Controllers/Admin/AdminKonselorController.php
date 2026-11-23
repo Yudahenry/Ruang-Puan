@@ -25,6 +25,17 @@ class AdminKonselorController extends Controller
     public function verifikasi(Request $request, $id)
     {
         $konselor = Konselor::findOrFail($id);
+
+        // Validasi backend: profil dan kredensial wajib lengkap sebelum disetujui oleh admin
+        if (!$konselor->isProfilLengkap()) {
+            $kelengkapan = $konselor->kelengkapanProfil();
+            $missingItems = implode(', ', array_slice($kelengkapan['missing'], 0, 4));
+
+            return back()->withErrors([
+                'error' => "Akun konselor ini belum dapat disetujui karena profil dan dokumen kredensial belum lengkap ({$kelengkapan['persentase']}% terisi). Data yang belum diisi: {$missingItems}."
+            ]);
+        }
+
         $admin = auth()->user()->admin;
 
         $konselor->update([

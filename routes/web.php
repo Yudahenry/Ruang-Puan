@@ -156,24 +156,28 @@ Route::middleware(['auth', 'verified', 'role:konselor'])->prefix('konselor')->na
     Route::put('/profil/{bagian}', [\App\Http\Controllers\Konselor\ProfilController::class, 'update'])->where('bagian', 'identitas|kredensial|layanan|rekening|kode-etik')->name('profil.update');
     
     Route::get('/dashboard', [BerandaKonselorController::class, 'index'])->name('dashboard');
-    Route::get('/jadwal', [JadwalKonsultasiController::class, 'index'])->name('jadwal');
-    Route::post('/jadwal', [JadwalKonsultasiController::class, 'store'])->name('jadwal.store');
-    Route::delete('/jadwal/{id}', [JadwalKonsultasiController::class, 'destroy'])->name('jadwal.destroy');
 
-    Route::post('/booking/{id}/konfirmasi', [BerandaKonselorController::class, 'konfirmasiBooking'])->name('booking.konfirmasi');
-    Route::post('/booking/{id}/tolak', [BerandaKonselorController::class, 'tolakBooking'])->name('booking.tolak');
-    Route::post('/chat/kirim', [BerandaKonselorController::class, 'kirimPesan'])->name('chat.kirim');
+    // Rute operasional yang membutuhkan profil & kredensial terisi lengkap
+    Route::middleware('konselor.profil_lengkap')->group(function () {
+        Route::get('/jadwal', [JadwalKonsultasiController::class, 'index'])->name('jadwal');
+        Route::post('/jadwal', [JadwalKonsultasiController::class, 'store'])->name('jadwal.store');
+        Route::delete('/jadwal/{id}', [JadwalKonsultasiController::class, 'destroy'])->name('jadwal.destroy');
 
-    Route::get('/chat/{id}', [\App\Http\Controllers\Konselor\ChatController::class, 'show'])->whereNumber('id')->name('chat.show');
-    Route::post('/chat/{id}', [\App\Http\Controllers\Konselor\ChatController::class, 'store'])->whereNumber('id')->name('chat.store');
+        Route::post('/booking/{id}/konfirmasi', [BerandaKonselorController::class, 'konfirmasiBooking'])->name('booking.konfirmasi');
+        Route::post('/booking/{id}/tolak', [BerandaKonselorController::class, 'tolakBooking'])->name('booking.tolak');
+        Route::post('/chat/kirim', [BerandaKonselorController::class, 'kirimPesan'])->name('chat.kirim');
 
-    // 🌟 Rute Booking Masuk diarahkan ke method bookingMasuk di BerandaKonselorController
-    Route::get('/booking', [BerandaKonselorController::class, 'bookingMasuk'])->name('booking');
+        Route::get('/chat/{id}', [\App\Http\Controllers\Konselor\ChatController::class, 'show'])->whereNumber('id')->name('chat.show');
+        Route::post('/chat/{id}', [\App\Http\Controllers\Konselor\ChatController::class, 'store'])->whereNumber('id')->name('chat.store');
 
-    Route::get('/chat', function () {
-        return redirect()->route('konselor.dashboard', ['modal' => 'chat']);
-    })->name('chat');
-    Route::get('/riwayat', [RiwayatSesiController::class, 'index'])->name('riwayat');
+        // 🌟 Rute Booking Masuk diarahkan ke method bookingMasuk di BerandaKonselorController
+        Route::get('/booking', [BerandaKonselorController::class, 'bookingMasuk'])->name('booking');
+
+        Route::get('/chat', function () {
+            return redirect()->route('konselor.dashboard', ['modal' => 'chat']);
+        })->name('chat');
+        Route::get('/riwayat', [RiwayatSesiController::class, 'index'])->name('riwayat');
+    });
 });
 
 Route::middleware(['auth:web,admin', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

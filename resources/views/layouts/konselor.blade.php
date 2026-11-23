@@ -152,22 +152,26 @@
                     </div>
 
                     <div class="py-1">
-                        <a href="{{ route('profile.edit') }}" class="flex items-center px-4 py-2.5 text-[#3E293F] hover:bg-[#FCFAF8] transition">
-                            <span class="mr-2.5">👤</span> Kelola Profil & Dokumen
+                        <a href="{{ route('profile.edit') }}" class="flex items-center px-4 py-2.5 text-[#3E293F] hover:bg-[#FCFAF8] transition gap-2.5">
+                            <svg class="w-4 h-4 text-[#643B62]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <span>Kelola Akun & Dokumen</span>
                         </a>
-                        <a href="{{ route('konselor.profil.edit') }}" class="flex items-center px-4 py-2.5 text-[#3E293F] hover:bg-[#FCFAF8] transition">
-                            <span class="mr-2.5">🛡️</span> Profil Profesional
+                        <a href="{{ route('konselor.profil.edit') }}" class="flex items-center px-4 py-2.5 text-[#3E293F] hover:bg-[#FCFAF8] transition gap-2.5">
+                            <svg class="w-4 h-4 text-[#643B62]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            <span>Profil Profesional</span>
                         </a>
-                        <a href="{{ route('konselor.jadwal') }}" class="flex items-center px-4 py-2.5 text-[#3E293F] hover:bg-[#FCFAF8] transition">
-                            <span class="mr-2.5">📅</span> Atur Jadwal Praktik
+                        <a href="{{ route('konselor.jadwal') }}" class="flex items-center px-4 py-2.5 text-[#3E293F] hover:bg-[#FCFAF8] transition gap-2.5">
+                            <svg class="w-4 h-4 text-[#643B62]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>Atur Jadwal Praktik</span>
                         </a>
                     </div>
 
                     <div class="border-t border-[#DCD5DD]/60 pt-1">
                         <form method="POST" action="{{ route('logout') }}" class="block">
                             @csrf
-                            <button type="submit" class="w-full text-left flex items-center px-4 py-2.5 text-red-600 hover:bg-red-50 font-semibold transition">
-                                <span class="mr-2.5">🚪</span> Keluar
+                            <button type="submit" class="w-full text-left flex items-center px-4 py-2.5 text-rose-600 hover:bg-rose-50 font-semibold transition gap-2.5">
+                                <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                <span>Keluar</span>
                             </button>
                         </form>
                     </div>
@@ -224,6 +228,28 @@
 @section('content')
 <div class="min-h-screen text-[#3E293F] flex flex-col justify-between">
     <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+        <!-- Notifikasi Global (Flash Messages) -->
+        @if(session('warning'))
+            <div class="mb-6 p-4 bg-amber-50 border border-amber-300 text-amber-900 rounded-2xl text-xs sm:text-sm font-semibold shadow-2xs flex items-center gap-3">
+                <span class="text-lg shrink-0">⚠️</span>
+                <span>{{ session('warning') }}</span>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-6 p-4 bg-rose-50 border border-rose-300 text-rose-800 rounded-2xl text-xs sm:text-sm font-semibold shadow-2xs flex items-center gap-3">
+                <span class="text-lg shrink-0">🚫</span>
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+
+        @if(session('success'))
+            <div class="mb-6 p-4 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-2xl text-xs sm:text-sm font-semibold shadow-2xs flex items-center gap-3">
+                <span class="text-lg shrink-0">✓</span>
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
+
         @yield('konselor-content')
     </main>
 

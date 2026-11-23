@@ -18,23 +18,34 @@ class JadwalKonsultasiController extends Controller
 
         $konselor = $user->konselor;
 
+        // Ambil data kelengkapan profil untuk kontrol UI
+        $kelengkapan = $konselor->kelengkapanProfil();
+        $isProfilLengkap = $konselor->isProfilLengkap();
+
         // Ambil daftar jadwal milik konselor yang sedang login
         $jadwals = JadwalKonsultasi::where('konselor_id', $konselor->id)
             ->orderBy('tanggal', 'desc')
             ->orderBy('jam_mulai', 'asc')
             ->get();
 
-        // Kirim variabel $konselor dan $jadwals ke view konselor.jadwal
-        return view('konselor.jadwal', compact('konselor', 'jadwals'));
+        // Kirim variabel ke view konselor.jadwal
+        return view('konselor.jadwal', compact('konselor', 'jadwals', 'kelengkapan', 'isProfilLengkap'));
     }
 
     public function store(Request $request)
     {
         $user = auth()->user();
 
-        // Pengecekan: Jika akun konselor dinonaktifkan oleh admin, blokir penambahan jadwal
+        // 1. Pengecekan status akun konselor
         if ($user->status === 'nonaktif') {
             return redirect()->back()->with('error', 'Akun Anda sedang dinonaktifkan oleh admin. Anda tidak dapat menambah jadwal.');
+        }
+
+        // 2. Pengecekan kelengkapan profil & kredensial wajib (Server-side validation)
+        $konselor = $user->konselor;
+        if (!$konselor || !$konselor->isProfilLengkap()) {
+            return redirect()->route('konselor.profil.edit')
+                ->with('error', 'Anda belum dapat menambahkan slot jadwal praktik karena profil dan kredensial belum lengkap. Silakan lengkapi seluruh profil terlebih dahulu.');
         }
 
         $request->validate([

@@ -108,19 +108,22 @@
                     </div>
 
                     <div class="py-1">
-                        <a href="{{ route('profile.edit') }}" class="flex items-center px-4 py-2.5 text-[#3E293F] hover:bg-[#FCFAF8] transition">
-                            <span class="mr-2.5">👤</span> Kelola Profil Akun
+                        <a href="{{ route('profile.edit') }}" class="flex items-center px-4 py-2.5 text-[#3E293F] hover:bg-[#FCFAF8] transition gap-2.5">
+                            <svg class="w-4 h-4 text-[#643B62]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <span>Kelola Profil Akun</span>
                         </a>
-                        <a href="{{ route('pelaporan.riwayat') }}" class="flex items-center px-4 py-2.5 text-[#3E293F] hover:bg-[#FCFAF8] transition">
-                            <span class="mr-2.5">📋</span> Riwayat Laporan
+                        <a href="{{ route('pelaporan.riwayat') }}" class="flex items-center px-4 py-2.5 text-[#3E293F] hover:bg-[#FCFAF8] transition gap-2.5">
+                            <svg class="w-4 h-4 text-[#643B62]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span>Riwayat Laporan</span>
                         </a>
                     </div>
 
                     <div class="border-t border-[#DCD5DD]/60 pt-1">
                         <form method="POST" action="{{ route('logout') }}" class="block">
                             @csrf
-                            <button type="submit" class="w-full text-left flex items-center px-4 py-2.5 text-red-600 hover:bg-red-50 font-semibold transition">
-                                <span class="mr-2.5">🚪</span> Keluar
+                            <button type="submit" class="w-full text-left flex items-center px-4 py-2.5 text-rose-600 hover:bg-rose-50 font-semibold transition gap-2.5">
+                                <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                <span>Keluar</span>
                             </button>
                         </form>
                     </div>
