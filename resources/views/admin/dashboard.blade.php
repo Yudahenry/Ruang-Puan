@@ -43,12 +43,27 @@
             </div>
         </div>
 
-        <!-- Card 4: Sesi Konsultasi & Transaksi -->
+        <!-- Card 4: Total Uang Masuk Konsultasi Berbayar -->
+        @php
+            $totalUangMasuk = 0;
+            if (class_exists('\App\Models\Pembayaran') && \Illuminate\Support\Facades\Schema::hasTable('pembayarans')) {
+                $totalUangMasuk = \App\Models\Pembayaran::where('status', 'berhasil')->sum('jumlah');
+            } elseif (class_exists('\App\Models\Pemesanan') && \Illuminate\Support\Facades\Schema::hasTable('pemesanans')) {
+                $totalUangMasuk = \App\Models\Pemesanan::sum('total_biaya');
+            } elseif (class_exists('\App\Models\Konsultasi') && \Illuminate\Support\Facades\Schema::hasTable('konsultasis')) {
+                foreach (['harga', 'biaya', 'tarif', 'total_harga', 'total_biaya', 'nominal'] as $kolom) {
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('konsultasis', $kolom)) {
+                        $totalUangMasuk = \App\Models\Konsultasi::sum($kolom);
+                        break;
+                    }
+                }
+            }
+        @endphp
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500 font-medium">Konsultasi / Transaksi</p>
                 <h3 class="text-2xl font-bold text-gray-800 mt-1">
-                    {{ class_exists('\App\Models\Konsultasi') ? \App\Models\Konsultasi::count() : '0' }}
+                    Rp {{ number_format($totalUangMasuk, 0, ',', '.') }}
                 </h3>
             </div>
             <div class="p-3 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
