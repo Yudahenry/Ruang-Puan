@@ -1,6 +1,18 @@
 @extends('layouts.pengguna')
 
 @section('pengguna-content')
+@php
+    $userBookedIds = $bookedJadwalIds ?? [];
+    if (empty($userBookedIds) && auth()->check() && class_exists(\App\Models\Pemesanan::class)) {
+        $userBookedIds = \App\Models\Pemesanan::where('user_id', auth()->id())
+            ->whereIn('jadwal_id', ($konselor->jadwalKonsultasis ?? collect())->pluck('id'))
+            ->whereNotIn('status', ['batal', 'ditolak', 'dibatalkan', 'gagal'])
+            ->pluck('jadwal_id')
+            ->map(fn ($id) => (int) $id)
+            ->toArray();
+    }
+@endphp
+
 <div class="max-w-4xl mx-auto px-4 py-8">
     <div class="bg-white rounded-3xl shadow-sm border border-[#DCD5DD] p-6 sm:p-10">
         
@@ -51,22 +63,50 @@
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             @foreach($konselor->jadwalKonsultasis as $jadwal)
-                                <label @click="selectedSlot = '{{ $jadwal->id }}'"
-                                       :class="selectedSlot === '{{ $jadwal->id }}' ? 'border-[#643B62] bg-[#EEE7F2]/40 ring-1 ring-[#643B62]' : 'border-[#DCD5DD] bg-[#FCFAF8] hover:border-[#746B77]/50'"
-                                       class="relative flex flex-col p-4 rounded-2xl border cursor-pointer transition-all duration-200 shadow-2xs group">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-xs font-bold text-[#3E293F]">
-                                            {{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('l, d M Y') }}
-                                        </span>
-                                        <input type="radio" name="jadwal_id" value="{{ $jadwal->id }}" class="text-[#643B62] focus:ring-[#643B62] w-4 h-4" required>
+                                @php
+                                    $sudahDipesanUser = in_array((int) $jadwal->id, $userBookedIds, true);
+                                @endphp
+
+                                @if($sudahDipesanUser)
+                                    <div class="relative flex flex-col p-4 rounded-2xl border border-emerald-500 bg-emerald-50/50 shadow-2xs select-none">
+                                        <div class="flex items-center justify-between gap-2 mb-2">
+                                            <span class="text-xs font-bold text-[#3E293F]">
+                                                {{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('l, d M Y') }}
+                                            </span>
+                                            <span class="w-4 h-4 rounded-full bg-emerald-600 border border-emerald-700 text-white flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 text-xs text-[#746B77] mt-1">
+                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <span class="font-medium text-[#3E293F]">
+                                                {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }} WIB
+                                            </span>
+                                        </div>
+                                        <p class="text-[11px] font-semibold text-emerald-700 mt-2">
+                                            ✓ Anda sudah melakukan pemesanan pada jadwal ini
+                                        </p>
                                     </div>
-                                    <div class="flex items-center gap-1.5 text-xs text-[#746B77] mt-1">
-                                        <svg class="w-3.5 h-3.5 text-[#643B62]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        <span class="font-medium text-[#3E293F]">
-                                            {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }} WIB
-                                        </span>
-                                    </div>
-                                </label>
+                                @else
+                                    <label @click="selectedSlot = '{{ $jadwal->id }}'"
+                                           :class="selectedSlot === '{{ $jadwal->id }}' ? 'border-[#643B62] bg-[#EEE7F2]/40 ring-1 ring-[#643B62]' : 'border-[#DCD5DD] bg-[#FCFAF8] hover:border-[#746B77]/50'"
+                                           class="relative flex flex-col p-4 rounded-2xl border cursor-pointer transition-all duration-200 shadow-2xs group">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-xs font-bold text-[#3E293F]">
+                                                {{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('l, d M Y') }}
+                                            </span>
+                                            <input type="radio" name="jadwal_id" value="{{ $jadwal->id }}" class="text-[#643B62] accent-[#643B62] focus:ring-[#643B62] w-4 h-4" required>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 text-xs text-[#746B77] mt-1">
+                                            <svg class="w-3.5 h-3.5 text-[#643B62]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <span class="font-medium text-[#3E293F]">
+                                                {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }} WIB
+                                            </span>
+                                        </div>
+                                    </label>
+                                @endif
                             @endforeach
                         </div>
                     </div>

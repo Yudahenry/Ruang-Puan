@@ -6,23 +6,62 @@ use App\Http\Controllers\Controller;
 use App\Models\Konselor;
 use App\Models\JadwalKonsultasi;
 use App\Models\Pemesanan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class KonsultasiController extends Controller
 {
+    /**
+     * Menghitung waktu berakhir slot berdasarkan tanggal dan jam_selesai.
+     */
+    private function getWaktuBerakhirSlot(JadwalKonsultasi $jadwal): Carbon
+    {
+        $tanggalSaja = Carbon::parse($jadwal->tanggal)->format('Y-m-d');
+        $jamSelesaiStr = $jadwal->jam_selesai ?: ($jadwal->jam_mulai ?: '23:59:59');
+
+        if (strlen($jamSelesaiStr) === 5) {
+            $jamSelesaiStr .= ':00';
+        }
+
+        return Carbon::createFromFormat(
+            'Y-m-d H:i:s',
+            $tanggalSaja . ' ' . $jamSelesaiStr,
+            config('app.timezone')
+        );
+    }
+
+    /**
+     * Mengembalikan koleksi jadwal yang jam sesinya masih berlaku (belum selesai).
+     */
+    private function filterJadwalAktif($jadwals)
+    {
+        $sekarang = now();
+
+        return $jadwals->filter(function ($jadwal) use ($sekarang) {
+            return $sekarang->lessThan($this->getWaktuBerakhirSlot($jadwal));
+        })->values();
+    }
+
     public function index(Request $request)
     {
         $collection = Konselor::where('status_verifikasi', 'disetujui')
             ->whereHas('user', fn ($q) => $q->where('status', 'aktif'))
             ->with(['user', 'jadwalKonsultasis' => function ($query) {
-                $query->where('status', 'tersedia')
-                      ->whereDate('tanggal', '>=', now()->toDateString())
+                $query->whereDate('tanggal', '>=', now()->toDateString())
                       ->orderBy('tanggal', 'asc')
                       ->orderBy('jam_mulai', 'asc');
             }])
             ->get();
+
+        // Saring slot yang jam sesinya sudah habis agar tidak dianggap jadwal aktif
+        $collection->each(function ($konselor) {
+            $konselor->setRelation(
+                'jadwalKonsultasis',
+                $this->filterJadwalAktif($konselor->jadwalKonsultasis ?? collect())
+            );
+        });
 
         // 1. Filter Pencarian (Nama atau Keahlian)
         if ($request->filled('search')) {
@@ -56,7 +95,7 @@ class KonsultasiController extends Controller
             });
         }
 
-        // 4. Filter Ketersediaan Jadwal
+        // 4. Filter Ketersediaan Jadwal (selama masih ada jadwal aktif / jam sesi belum habis)
         if ($request->filled('ketersediaan')) {
             $collection = $collection->filter(function ($k) use ($request) {
                 if ($request->ketersediaan === 'tersedia') {
@@ -76,7 +115,7 @@ class KonsultasiController extends Controller
         } elseif ($sort === 'tarif_tertinggi') {
             $collection = $collection->sortByDesc(fn ($k) => (int) ($k->tarif ?? $k->biaya_konsultasi ?? $k->harga ?? 150000));
         } else {
-            // Urutkan berdasarkan jadwal terdekat yang tersedia
+            // Urutkan berdasarkan jadwal terdekat
             $collection = $collection->sortBy(function ($k) {
                 $first = $k->jadwalKonsultasis->first();
                 return $first ? ($first->tanggal . ' ' . $first->jam_mulai) : '9999-12-31 23:59:59';
@@ -107,11 +146,15 @@ class KonsultasiController extends Controller
         );
 
         $konselor->load(['user', 'jadwalKonsultasis' => function ($query) {
-            $query->where('status', 'tersedia')
-                  ->whereDate('tanggal', '>=', now()->toDateString())
+            $query->whereDate('tanggal', '>=', now()->toDateString())
                   ->orderBy('tanggal', 'asc')
                   ->orderBy('jam_mulai', 'asc');
         }]);
+
+        $konselor->setRelation(
+            'jadwalKonsultasis',
+            $this->filterJadwalAktif($konselor->jadwalKonsultasis ?? collect())
+        );
 
         return view('konsultasi.jadwal', compact('konselor'));
     }
@@ -129,8 +172,19 @@ class KonsultasiController extends Controller
             return back()->withErrors(['jadwal' => 'Konselor ini sedang tidak tersedia.']);
         }
 
-        if ($jadwal->status !== 'tersedia') {
-            return back()->withErrors(['jadwal' => 'Jadwal ini sudah tidak tersedia.']);
+        // Jika jam sesi sudah habis, tolak booking (status di DB tetap aman)
+        if (now()->greaterThanOrEqualTo($this->getWaktuBerakhirSlot($jadwal))) {
+            return back()->withErrors(['jadwal' => 'Sesi jadwal konsultasi ini sudah selesai/berakhir.']);
+        }
+
+        // Cegah user yang sama memesan slot yang sama secara ganda
+        $sudahDipesanUserIni = Pemesanan::where('user_id', Auth::id())
+            ->where('jadwal_id', $jadwal->id)
+            ->whereIn('status', ['pending', 'menunggu_pembayaran', 'terkonfirmasi', 'lunas', 'selesai'])
+            ->exists();
+
+        if ($sudahDipesanUserIni) {
+            return back()->withErrors(['jadwal' => 'Anda sudah melakukan pemesanan pada slot jadwal ini.']);
         }
 
         // Mengambil tarif asli dari konselor (mendukung berbagai nama kolom database)
@@ -140,10 +194,13 @@ class KonsultasiController extends Controller
             'user_id' => Auth::id(),
             'jadwal_id' => $jadwal->id,
             'status' => 'menunggu_pembayaran',
-            'total_biaya' => $tarifKonselor, // Menyimpan tarif dinamis secara akurat ke database
+            'total_biaya' => $tarifKonselor,
         ]);
 
-        $jadwal->update(['status' => 'terpesan']);
+        // Tandai slot sebagai terpesan selama belum selesai (tetap bisa dipesan user lain)
+        if ($jadwal->status !== 'terpesan') {
+            $jadwal->update(['status' => 'terpesan']);
+        }
 
         return redirect()->route('konsultasi.tagihan', $pemesanan->id)
                          ->with('success', 'Pemesanan konsultasi berhasil dibuat. Silakan lakukan pembayaran.');
