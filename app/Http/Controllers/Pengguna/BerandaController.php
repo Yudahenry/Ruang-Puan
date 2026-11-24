@@ -94,7 +94,7 @@ class BerandaController extends Controller
                 'konsultasi'
             ])
             ->where('pemesanans.user_id', $userId)
-            ->whereNotIn('pemesanans.status', ['batal', 'ditolak'])
+            ->whereNotIn('pemesanans.status', ['batal', 'ditolak', 'selesai'])
             ->join('jadwal_konsultasis', 'pemesanans.jadwal_id', '=', 'jadwal_konsultasis.id')
             ->where(function ($query) {
                 $query->where('jadwal_konsultasis.tanggal', '>', now()->toDateString())

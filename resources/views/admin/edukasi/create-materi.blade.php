@@ -55,9 +55,11 @@
         </div>
 
         <div>
-            <label for="isi" class="block text-sm font-medium text-ink-900 mb-1">Isi / Konten Materi</label>
-            <textarea id="isi" name="isi" rows="8" required placeholder="Tuliskan isi materi selengkapnya di sini..."
-                class="w-full rounded-lg border-cream-200 bg-cream-50 focus:border-berry-500 focus:ring-berry-500 px-3 py-2 text-ink-900 border text-sm">{{ old('isi') }}</textarea>
+            <label class="block text-sm font-medium text-ink-900 mb-1">Isi / Konten Materi</label>
+            <div class="rounded-lg border border-cream-200 bg-white">
+                <div id="editor-isi" style="min-height: 280px; font-size: 15px;"></div>
+            </div>
+            <input type="hidden" id="isi" name="isi" value="{{ old('isi') }}">
         </div>
 
         <div>
@@ -77,4 +79,35 @@
         </div>
     </form>
 </div>
+
+<link href="{{ asset('vendor/quill/quill.snow.css') }}" rel="stylesheet">
+<script src="{{ asset('vendor/quill/quill.min.js') }}"></script>
+<script>
+(function () {
+    var input = document.getElementById('isi');
+    var quill = new Quill('#editor-isi', {
+        theme: 'snow',
+        placeholder: 'Tuliskan isi materi selengkapnya di sini...',
+        modules: {
+            toolbar: [
+                [{ header: [2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['blockquote', 'link'],
+                [{ align: [] }],
+                ['clean']
+            ]
+        }
+    });
+    if (input.value) { quill.root.innerHTML = input.value; }
+    input.form.addEventListener('submit', function (e) {
+        if (quill.getText().trim().length === 0) {
+            e.preventDefault();
+            alert('Isi materi wajib diisi.');
+            return;
+        }
+        input.value = quill.root.innerHTML;
+    });
+})();
+</script>
 @endsection

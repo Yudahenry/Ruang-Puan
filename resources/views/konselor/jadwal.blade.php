@@ -64,6 +64,16 @@
         </div>
     @endif
 
+    @if($errors->any())
+        <div class="p-4 bg-rose-50 text-rose-800 rounded-2xl text-xs font-semibold shadow-2xs border border-rose-300">
+            <ul class="list-disc list-inside space-y-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <!-- Banner Peringatan jika Profil Belum Lengkap -->
     @if(!$profilLengkap)
         <div class="p-6 bg-gradient-to-r from-amber-50 via-white to-amber-50/70 border-2 border-amber-300 rounded-3xl text-amber-900 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -157,7 +167,40 @@
                 <tbody class="divide-y divide-[#DCD5DD]/50">
                     @forelse($jadwals as $jadwal)
                         @php
-                            $isTersedia = $jadwal->status === 'tersedia';
+                            $daftarPesanan = $jadwal->pemesanans ?? $jadwal->bookings ?? collect();
+
+                            // Fallback ambil langsung dari model Pemesanan jika relasi di $jadwal kosong
+                            if ($daftarPesanan->isEmpty() && class_exists(\App\Models\Pemesanan::class)) {
+                                $daftarPesanan = \App\Models\Pemesanan::with('user')
+                                    ->where('jadwal_id', $jadwal->id)
+                                    ->latest()
+                                    ->get();
+                            }
+
+                            // Cek apakah waktu sesi (tanggal + jam_selesai) sudah habis
+                            $tanggalSaja = \Carbon\Carbon::parse($jadwal->tanggal)->format('Y-m-d');
+                            $jamSelesaiStr = $jadwal->jam_selesai ?: ($jadwal->jam_mulai ?: '23:59:59');
+                            if (strlen($jamSelesaiStr) === 5) {
+                                $jamSelesaiStr .= ':00';
+                            }
+                            $waktuBerakhir = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $tanggalSaja . ' ' . $jamSelesaiStr, config('app.timezone'));
+                            $isSesiHabis = now()->greaterThanOrEqualTo($waktuBerakhir);
+
+                            $hasPesanan = $daftarPesanan->isNotEmpty() || strtolower($jadwal->status ?? '') === 'terpesan';
+
+                            if ($isSesiHabis) {
+                                $statusLabel = 'Selesai';
+                                $statusClass = 'bg-stone-100 text-stone-700 border-stone-200';
+                                $dotClass = 'bg-stone-400';
+                            } elseif ($hasPesanan) {
+                                $statusLabel = 'Terpesan';
+                                $statusClass = 'bg-amber-50 text-amber-800 border-amber-200';
+                                $dotClass = 'bg-amber-500';
+                            } else {
+                                $statusLabel = ucfirst($jadwal->status ?? 'tersedia');
+                                $statusClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+                                $dotClass = 'bg-emerald-500';
+                            }
                         @endphp
                         <tr class="hover:bg-[#FCFAF8] transition">
                             <td class="py-4 px-4 font-medium text-[#3E293F]">
@@ -170,20 +213,79 @@
                                 </span>
                             </td>
                             <td class="py-4 px-4">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold border {{ $isTersedia ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200' }}">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ $isTersedia ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
-                                    <span>{{ ucfirst($jadwal->status) }}</span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold border {{ $statusClass }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $dotClass }}"></span>
+                                    <span>{{ $statusLabel }}</span>
                                 </span>
+                                @if($daftarPesanan->isNotEmpty())
+                                    <span class="ml-1.5 text-[11px] text-[#746B77]">({{ $daftarPesanan->count() }} pemesan)</span>
+                                @endif
                             </td>
                             <td class="py-4 px-4 text-right">
-                                <form action="{{ route('konselor.jadwal.destroy', $jadwal->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus slot jadwal ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-3 py-1.5 text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 rounded-xl font-semibold transition text-xs inline-flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        <span>Hapus</span>
+                                <div class="inline-flex items-center justify-end gap-2">
+                                    @if($daftarPesanan->isNotEmpty())
+                                    <button type="button"
+                                            onclick="togglePemesan({{ $jadwal->id }})"
+                                            title="Lihat daftar pemesan pada sesi ini"
+                                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-[#DCD5DD] bg-[#FCFAF8] hover:bg-[#EEE7F2] text-[#643B62] font-semibold transition text-xs shadow-2xs cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                        <span>Pemesan</span>
                                     </button>
-                                </form>
+                                    @endif
+
+                                    <form action="{{ route('konselor.jadwal.destroy', $jadwal->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus slot jadwal ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="px-3 py-1.5 text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 rounded-xl font-semibold transition text-xs inline-flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            <span>Hapus</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {{-- Panel Daftar Pemesan pada Sesi Ini (Muncul saat tombol pemesan diklik) --}}
+                        <tr id="pemesan-row-{{ $jadwal->id }}" class="hidden bg-[#FCFAF8]">
+                            <td colspan="4" class="px-5 py-4 border-t border-[#DCD5DD]/50">
+                                <div class="flex items-center justify-between mb-3">
+                                    <p class="text-xs font-bold text-[#3E293F]">
+                                        Daftar Pengguna yang Booking Sesi ({{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }} WIB)
+                                    </p>
+                                    <span class="text-[11px] text-[#746B77]">Total: {{ $daftarPesanan->count() }} orang</span>
+                                </div>
+
+                                @if($daftarPesanan->isNotEmpty())
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                                        @foreach($daftarPesanan as $index => $pesanan)
+                                            @php
+                                                $pemesan = $pesanan->user ?? null;
+                                                $namaPemesan = $pemesan?->nama ?? $pemesan?->name ?? $pemesan?->email ?? 'Pengguna #' . ($pesanan->user_id ?? ($index + 1));
+                                                $emailPemesan = $pemesan?->email;
+                                            @endphp
+                                            <div class="bg-white border border-[#DCD5DD] rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 shadow-2xs">
+                                                <div class="min-w-0">
+                                                    <p class="text-xs font-semibold text-[#3E293F] truncate">
+                                                        {{ $index + 1 }}. {{ $namaPemesan }}
+                                                    </p>
+                                                    @if($emailPemesan && $namaPemesan !== $emailPemesan)
+                                                        <p class="text-[11px] text-[#746B77] truncate">{{ $emailPemesan }}</p>
+                                                    @endif
+                                                </div>
+                                                @if(!empty($pesanan->status))
+                                                    <span class="px-2 py-0.5 rounded-full bg-[#EEE7F2] text-[#643B62] text-[10px] font-semibold whitespace-nowrap">
+                                                        {{ ucfirst(str_replace('_', ' ', $pesanan->status)) }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <p class="text-xs text-[#746B77]">Belum ada data pemesanan yang tercatat pada slot jadwal ini.</p>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -208,4 +310,12 @@
     </div>
 
 </div>
+
+<script>
+    function togglePemesan(jadwalId) {
+        const row = document.getElementById('pemesan-row-' + jadwalId);
+        if (!row) return;
+        row.classList.toggle('hidden');
+    }
+</script>
 @endsection
