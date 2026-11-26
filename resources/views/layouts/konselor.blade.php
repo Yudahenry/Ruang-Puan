@@ -42,10 +42,6 @@
                 Booking Masuk
             </a>
             <a href="{{ route('konselor.riwayat') }}" 
-               class="px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 {{ request()->routeIs('konselor.chat') ? 'bg-white text-[#3E293F] font-medium shadow-xs' : 'text-[#746B77] hover:text-[#3E293F] hover:bg-white/60' }}">
-                Chat
-            </a>
-            <a href="{{ route('konselor.riwayat') }}" 
                class="px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 {{ request()->routeIs('konselor.riwayat') ? 'bg-white text-[#3E293F] font-medium shadow-xs' : 'text-[#746B77] hover:text-[#3E293F] hover:bg-white/60' }}">
                 Riwayat
             </a>
@@ -200,9 +196,6 @@
         </a>
         <a href="{{ route('konselor.booking') }}" class="block px-4 py-2.5 rounded-2xl text-xs font-medium text-[#746B77] hover:bg-[#FCFAF8]">
             Booking Masuk
-        </a>
-        <a href="{{ route('konselor.riwayat') }}" class="block px-4 py-2.5 rounded-2xl text-xs font-medium text-[#746B77] hover:bg-[#FCFAF8]">
-            Chat Konsultasi
         </a>
         <a href="{{ route('konselor.riwayat') }}" class="block px-4 py-2.5 rounded-2xl text-xs font-medium text-[#746B77] hover:bg-[#FCFAF8]">
             Riwayat
